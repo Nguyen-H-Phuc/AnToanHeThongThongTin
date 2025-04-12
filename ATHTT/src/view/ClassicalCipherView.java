@@ -1,0 +1,168 @@
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.GridLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+
+public abstract class ClassicalCipherView {
+	private JFrame frame;
+	private JLabel labelInput, labelOutput;
+	private JTextArea inputText, outputText;
+	private JTextField sourceFilePath, destFilePath;
+	private JButton encryptTextBtn, decryptTextBtn, saveResultBtn, encryptFileBtn, decryptFileBtn;
+	private JPanel textPanel, filePanel;
+	
+	public void createFrame(int height, int width, String title) {
+		frame = new JFrame();
+		frame.setSize(width, height);
+		frame.setTitle(title);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);		
+	}
+	
+	public void createPanelTextCipher() {
+		textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        textPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Input Panel
+        JPanel inputPanel = new JPanel(new BorderLayout());
+        labelInput = new JLabel("Nhập văn bản", SwingConstants.LEFT);
+        inputText = new JTextArea(8, 50);
+        inputText.setLineWrap(true);
+        inputText.setWrapStyleWord(true);
+        JScrollPane scrollInput = new JScrollPane(inputText);
+        scrollInput.setPreferredSize(new Dimension(600, 100));
+        inputPanel.add(labelInput, BorderLayout.NORTH);
+        inputPanel.add(scrollInput, BorderLayout.CENTER);
+
+        // Output Panel
+        JPanel outputPanel = new JPanel(new BorderLayout());
+        labelOutput = new JLabel("Kết quả", SwingConstants.LEFT);
+        outputText = new JTextArea(8, 50);
+        outputText.setLineWrap(true);
+        outputText.setWrapStyleWord(true);
+        JScrollPane scrollOutput = new JScrollPane(outputText);
+        scrollOutput.setPreferredSize(new Dimension(600, 100));
+        outputPanel.add(labelOutput, BorderLayout.NORTH);
+        outputPanel.add(scrollOutput, BorderLayout.CENTER);
+
+        // Text Buttons
+        JPanel textBtnPanel = new JPanel();
+        encryptTextBtn = new JButton("Mã hóa văn bản");
+        decryptTextBtn = new JButton("Giải mã văn bản");
+        saveResultBtn = new JButton("Lưu kết quả");
+        textBtnPanel.add(encryptTextBtn);
+        textBtnPanel.add(decryptTextBtn);
+        textBtnPanel.add(saveResultBtn);
+
+        textPanel.add(inputPanel);
+        textPanel.add(Box.createVerticalStrut(10));
+        textPanel.add(outputPanel);
+        textPanel.add(Box.createVerticalStrut(10));
+        textPanel.add(textBtnPanel);
+	}
+	
+	public void createFileCipherPanel() {
+		filePanel = new JPanel();
+        filePanel.setLayout(new GridLayout(5, 1, 5, 5));
+        filePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // === Source file panel with button ===
+        JLabel labelSource = new JLabel("Đường dẫn file nguồn:");
+        JPanel sourcePanel = new JPanel(new BorderLayout());
+        sourceFilePath = new JTextField();
+        JButton browseSourceBtn = new JButton("...");
+        sourcePanel.add(sourceFilePath, BorderLayout.CENTER);
+        sourcePanel.add(browseSourceBtn, BorderLayout.EAST);
+
+        // === Dest file panel with button ===
+        JLabel labelDest = new JLabel("Đường dẫn file đích:");
+        JPanel destPanel = new JPanel(new BorderLayout());
+        destFilePath = new JTextField();
+        JButton browseDestBtn = new JButton("...");
+        destPanel.add(destFilePath, BorderLayout.CENTER);
+        destPanel.add(browseDestBtn, BorderLayout.EAST);
+
+        // === Button panel ===
+        JPanel fileBtnPanel = new JPanel();
+        encryptFileBtn = new JButton("Mã hóa file");
+        decryptFileBtn = new JButton("Giải mã file");
+        fileBtnPanel.add(encryptFileBtn);
+        fileBtnPanel.add(decryptFileBtn);
+
+        // === Add to file panel ===
+        filePanel.add(labelSource);
+        filePanel.add(sourcePanel);
+        filePanel.add(labelDest);
+        filePanel.add(destPanel);
+        filePanel.add(fileBtnPanel);
+
+        // === Add file panel to frame ===
+        frame.add(filePanel, BorderLayout.SOUTH);
+
+        // ===== Action for browse buttons =====
+        browseSourceBtn.addActionListener(e -> {
+            FileDialog fileDialog = new FileDialog((Frame) null, "Chọn file nguồn", FileDialog.LOAD);
+            fileDialog.setVisible(true);
+            if (fileDialog.getFile() != null) {
+                String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
+                sourceFilePath.setText(selectedFile);
+            }
+        });
+
+
+        browseDestBtn.addActionListener(e -> {
+        	FileDialog fileDialog = new FileDialog((Frame) null, "Chọn file đích", FileDialog.LOAD);
+            fileDialog.setVisible(true);
+            if (fileDialog.getFile() != null) {
+                String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
+                destFilePath.setText(selectedFile);
+            }
+        });
+	}
+	
+	public abstract void createKeyPanel();
+	
+	public JButton getEncryptTextBtn() {
+		return encryptTextBtn;
+	}
+
+	public JButton getDecryptTextBtn() {
+		return decryptTextBtn;
+	}
+	
+	public JButton getSaveResultBtn() {
+		return saveResultBtn;
+	}
+
+	public JTextArea getInputText() {
+		return inputText;
+	}
+
+	public void setInputText(JTextArea inputText) {
+		this.inputText = inputText;
+	}
+
+	public JTextArea getOutputText() {
+		return outputText;
+	}
+
+	public void setOutputText(JTextArea outputText) {
+		this.outputText = outputText;
+	}
+
+}
