@@ -33,6 +33,16 @@ public class View extends JFrame {
 		mainFrame.setVisible(true);
 	}
 	
+	public JButton getClassicEncryptBtn() {
+		return classicEncryptBtn;
+	}
+	public JButton getSymmetricEncryptionBtn() {
+		return symmetricEncryptionbtn;
+	}
+	public JButton getAsymmetricEncryptionBtn() {
+		return asymmetricEncryptionbtn;
+	}
+	
 	public static void main(String[] args) {
 		View view = new View();
 	}
