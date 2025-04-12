@@ -1,8 +1,9 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
@@ -10,8 +11,10 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -23,7 +26,7 @@ import javax.swing.SwingUtilities;
 public class SubstitutionCipherView {
 	private JFrame frame;
 	private JPanel keyPanel, textPanel, filePanel, btnTextPanel, btnFilePanel;
-	private JButton encryptTextBtn, decryptTextBtn, encryptFileBtn, decryptFileBtn, createKey, saveKey, loadKey, saveResult;
+	private JButton encryptTextBtn, decryptTextBtn, encryptFileBtn, decryptFileBtn, createKey, saveKey, loadKey, saveResultBtn;
 	private JTextArea inputText, outputText;
 	private JTextField sourceFilePath, destFilePath;
 	private JLabel labelInputText, labelOutPutText, labelSourceFile, labelDestFile;
@@ -34,7 +37,7 @@ public class SubstitutionCipherView {
 
     private void init() {
         frame = new JFrame("Substitution Cipher Tool");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(700, 600);
         frame.setLayout(new BorderLayout(10, 10));
 
@@ -79,10 +82,10 @@ public class SubstitutionCipherView {
         JPanel textBtnPanel = new JPanel();
         encryptTextBtn = new JButton("Mã hóa văn bản");
         decryptTextBtn = new JButton("Giải mã văn bản");
-        saveResult = new JButton("Lưu kết quả");
+        saveResultBtn = new JButton("Lưu kết quả");
         textBtnPanel.add(encryptTextBtn);
         textBtnPanel.add(decryptTextBtn);
-        textBtnPanel.add(saveResult);
+        textBtnPanel.add(saveResultBtn);
 
         textPanel.add(inputPanel);
         textPanel.add(Box.createVerticalStrut(10));
@@ -92,95 +95,127 @@ public class SubstitutionCipherView {
 
         frame.add(textPanel, BorderLayout.CENTER);
 
-        // ===== SOUTH: File Panel =====
+     // ===== SOUTH: File Panel =====
         JPanel filePanel = new JPanel();
         filePanel.setLayout(new GridLayout(5, 1, 5, 5));
         filePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // === Source file panel with button ===
         JLabel labelSource = new JLabel("Đường dẫn file nguồn:");
+        JPanel sourcePanel = new JPanel(new BorderLayout());
         sourceFilePath = new JTextField();
-        JLabel labelDest = new JLabel("Đường dẫn file đích:");
-        destFilePath = new JTextField();
+        JButton browseSourceBtn = new JButton("...");
+        sourcePanel.add(sourceFilePath, BorderLayout.CENTER);
+        sourcePanel.add(browseSourceBtn, BorderLayout.EAST);
 
+        // === Dest file panel with button ===
+        JLabel labelDest = new JLabel("Đường dẫn file đích:");
+        JPanel destPanel = new JPanel(new BorderLayout());
+        destFilePath = new JTextField();
+        JButton browseDestBtn = new JButton("...");
+        destPanel.add(destFilePath, BorderLayout.CENTER);
+        destPanel.add(browseDestBtn, BorderLayout.EAST);
+
+        // === Button panel ===
         JPanel fileBtnPanel = new JPanel();
         encryptFileBtn = new JButton("Mã hóa file");
         decryptFileBtn = new JButton("Giải mã file");
         fileBtnPanel.add(encryptFileBtn);
         fileBtnPanel.add(decryptFileBtn);
 
+        // === Add to file panel ===
         filePanel.add(labelSource);
-        filePanel.add(sourceFilePath);
+        filePanel.add(sourcePanel);
         filePanel.add(labelDest);
-        filePanel.add(destFilePath);
+        filePanel.add(destPanel);
         filePanel.add(fileBtnPanel);
 
+        // === Add file panel to frame ===
         frame.add(filePanel, BorderLayout.SOUTH);
+
+        // ===== Action for browse buttons =====
+        browseSourceBtn.addActionListener(e -> {
+            FileDialog fileDialog = new FileDialog((Frame) null, "Chọn file nguồn", FileDialog.LOAD);
+            fileDialog.setVisible(true);
+            if (fileDialog.getFile() != null) {
+                String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
+                sourceFilePath.setText(selectedFile);
+            }
+        });
+
+
+        browseDestBtn.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showSaveDialog(frame);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                destFilePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
+            }
+        });
+
 
         // ===== Hiển thị giao diện =====
         frame.setLocationRelativeTo(null); // hiện giữa màn hình
         frame.setVisible(true);
     }
+    
+    public void showWarningDialog(String message) {
+    	JOptionPane.showMessageDialog(null, message, "Thông báo", JOptionPane.WARNING_MESSAGE);
+    }
+    
+    public void showErrorDiaglog(String message) {
+    	JOptionPane.showMessageDialog(null, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    public String showFileChooser() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showSaveDialog(frame);
+        if (result == JFileChooser.APPROVE_OPTION) {
+        	return fileChooser.getSelectedFile().getAbsolutePath();
+        }
+        return "";
+    }
 	
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Substitution Cipher Tool");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600, 500);
-            frame.setLayout(new BorderLayout(10, 10));
+	public JButton getCreateKey() {
+		return createKey;
+	}
 
-            // Panel trên cùng - các nút key
-            JPanel keyPanel = new JPanel();
-            JButton loadKeyButton = new JButton("Load Key");
-            JButton createKeyButton = new JButton("Create Key");
-            JButton saveKeyButton = new JButton("Save Key");
-            keyPanel.add(loadKeyButton);
-            keyPanel.add(createKeyButton);
-            keyPanel.add(saveKeyButton);
+	public JButton getSaveKey() {
+		return saveKey;
+	}
 
-            // Panel giữa - văn bản & kết quả
-            JPanel textPanel = new JPanel(new GridLayout(2, 1, 5, 5));
-            JTextArea inputArea = new JTextArea("Nhập văn bản tại đây...");
-            JTextArea outputArea = new JTextArea("Kết quả...");
-            inputArea.setLineWrap(true);
-            outputArea.setLineWrap(true);
-            textPanel.add(new JScrollPane(inputArea));
-            textPanel.add(new JScrollPane(outputArea));
+	public JButton getLoadKey() {
+		return loadKey;
+	}
 
-            // Panel nhập link file và chọn chế độ
-            JPanel bottomPanel = new JPanel(new GridLayout(3, 1, 5, 5));
-            JPanel filePanel = new JPanel(new BorderLayout(5, 5));
-            JLabel fileLabel = new JLabel("File path:");
-            JTextField fileField = new JTextField();
-            filePanel.add(fileLabel, BorderLayout.WEST);
-            filePanel.add(fileField, BorderLayout.CENTER);
+	public JButton getEncryptTextBtn() {
+		return encryptTextBtn;
+	}
 
-            // Panel chế độ mã hoá / giải mã
-            JPanel modePanel = new JPanel();
-            JRadioButton encryptButton = new JRadioButton("Mã hoá");
-            JRadioButton decryptButton = new JRadioButton("Giải mã");
-            ButtonGroup modeGroup = new ButtonGroup();
-            modeGroup.add(encryptButton);
-            modeGroup.add(decryptButton);
-            encryptButton.setSelected(true);
-            modePanel.add(encryptButton);
-            modePanel.add(decryptButton);
+	public JButton getDecryptTextBtn() {
+		return decryptTextBtn;
+	}
+	
+	public JButton getSaveResultBtn() {
+		return saveResultBtn;
+	}
 
-            // Panel nút thực hiện
-            JPanel actionPanel = new JPanel();
-            JButton executeButton = new JButton("Thực hiện");
-            actionPanel.add(executeButton);
+	public JTextArea getInputText() {
+		return inputText;
+	}
 
-            bottomPanel.add(filePanel);
-            bottomPanel.add(modePanel);
-            bottomPanel.add(actionPanel);
+	public void setInputText(JTextArea inputText) {
+		this.inputText = inputText;
+	}
 
-            // Thêm vào Frame chính
-            frame.add(keyPanel, BorderLayout.NORTH);
-            frame.add(textPanel, BorderLayout.CENTER);
-            frame.add(bottomPanel, BorderLayout.SOUTH);
+	public JTextArea getOutputText() {
+		return outputText;
+	}
 
-            frame.setVisible(true);
-        });
+	public void setOutputText(JTextArea outputText) {
+		this.outputText = outputText;
+	}
+
+	public static void main(String[] args) {		
 		new SubstitutionCipherView();
     }
 
