@@ -12,6 +12,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -137,6 +138,35 @@ public abstract class ClassicalCipherView {
 	
 	public abstract void createKeyPanel();
 	
+	public void showDialogMessage(String message, String type) {
+		switch (type.toUpperCase()) {
+		case "ERROR":
+			JOptionPane.showMessageDialog(null, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
+			break;
+		case "WARNING":
+			JOptionPane.showMessageDialog(null, message, "Thông báo", JOptionPane.WARNING_MESSAGE);
+			break;
+		case "INFO":
+			JOptionPane.showMessageDialog(null, message, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+			break;
+		}
+	}
+	
+	
+	
+	public JFrame getFrame() {
+		return frame;
+	}
+	
+
+	public JPanel getTextPanel() {
+		return textPanel;
+	}
+
+	public JPanel getFilePanel() {
+		return filePanel;
+	}
+
 	public JButton getEncryptTextBtn() {
 		return encryptTextBtn;
 	}
@@ -164,5 +194,5 @@ public abstract class ClassicalCipherView {
 	public void setOutputText(JTextArea outputText) {
 		this.outputText = outputText;
 	}
-
+	
 }
