@@ -2,7 +2,9 @@ package controller;
 
 import javax.swing.JOptionPane;
 
+import model.classicialcipher.ShiftCipher;
 import model.classicialcipher.SubstitutionCipher;
+import view.ShiftCipherView;
 import view.SubstitutionCipherView;
 import view.View;
 
@@ -15,15 +17,20 @@ public class ViewController {
 	}
 
 	private void initController() {
-		view.getClassicEncryptBtn().addActionListener(e -> openClassicEncryptView());
-		view.getSymmetricEncryptionBtn().addActionListener(e -> showNotImplemented());
-		view.getAsymmetricEncryptionBtn().addActionListener(e -> showNotImplemented());
+		view.getSubstitutionCipherBtn().addActionListener(e ->  openSubstitutionView());
+		view.getShiftCipherBtn().addActionListener(e -> openShiftCipherView());
 	}
 
-	private void openClassicEncryptView() {
+	private void openSubstitutionView() {
 		SubstitutionCipherView subView = new SubstitutionCipherView();
 		SubstitutionCipher subModel = new SubstitutionCipher();
 		new SubstitutionCipherController(subView, subModel);
+	}
+	
+	private void openShiftCipherView() {
+		ShiftCipherView shiftView = new ShiftCipherView();
+		ShiftCipher shiftModel = new ShiftCipher();
+		new ShiftCipherConttroler(shiftModel, shiftView); 
 	}
 
 	private void showNotImplemented() {

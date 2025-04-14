@@ -57,6 +57,32 @@ public class ShiftCipherView extends ClassicalCipherView {
 	     
 	}
 	
+	
+	
+	public JButton getGenKey() {
+		return genKey;
+	}
+
+	public void setGenKey(JButton genKey) {
+		this.genKey = genKey;
+	}
+
+	public JButton getSaveKey() {
+		return saveKey;
+	}
+
+	public void setSaveKey(JButton saveKey) {
+		this.saveKey = saveKey;
+	}
+
+	public JButton getLoadKey() {
+		return loadKey;
+	}
+
+	public void setLoadKey(JButton loadKey) {
+		this.loadKey = loadKey;
+	}
+
 	public void setValueSpinner(int value) {
 		spinner.setValue(value);
 	}
@@ -65,8 +91,5 @@ public class ShiftCipherView extends ClassicalCipherView {
 		return (int) spinner.getValue();
 	}
 	
-	public static void main(String[] args) {
-		new ShiftCipherView();
-	}
 
 }

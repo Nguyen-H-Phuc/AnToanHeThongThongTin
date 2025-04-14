@@ -10,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -138,6 +139,20 @@ public abstract class ClassicalCipherView {
 	
 	public abstract void createKeyPanel();
 	
+	public String showFileDialog(String title) {
+	    FileDialog fileDialog = new FileDialog(frame, title, FileDialog.SAVE);
+	    fileDialog.setVisible(true);
+
+	    String directory = fileDialog.getDirectory();
+	    String filename = fileDialog.getFile();
+
+	    if (directory != null && filename != null) {
+	        return directory + filename;
+	    }
+	    return "";
+	}
+
+	
 	public void showDialogMessage(String message, String type) {
 		switch (type.toUpperCase()) {
 		case "ERROR":
@@ -150,8 +165,14 @@ public abstract class ClassicalCipherView {
 			JOptionPane.showMessageDialog(null, message, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
 			break;
 		}
+
 	}
-	
+
+	public int showYesNoDialog(String message1, String message2) {
+		int result = JOptionPane.showConfirmDialog(null, message1, message2, JOptionPane.YES_NO_OPTION,
+				JOptionPane.WARNING_MESSAGE);
+		return result;
+	}
 	
 	
 	public JFrame getFrame() {
@@ -195,4 +216,7 @@ public abstract class ClassicalCipherView {
 		this.outputText = outputText;
 	}
 	
+	public String getText() {
+		return this.inputText.getText();
+	}
 }

@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class View extends JFrame {
-	private JButton classicEncryptBtn, symmetricEncryptionbtn, asymmetricEncryptionbtn ;
+	private JButton substitutionCipherBtn, shiftCipherBtn, symmetricEncryptionBtn, asymmetricEncryptionBtn ;
 	private JFrame mainFrame;
 	private JPanel mainPanel;
 
@@ -20,29 +20,29 @@ public class View extends JFrame {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new FlowLayout());
 		
-		classicEncryptBtn = new JButton("Mã hoá cổ điển");
-		symmetricEncryptionbtn = new JButton("Mã hoá đối xứng");
-		asymmetricEncryptionbtn = new JButton("Mã hoá bất đối xứng");
+		substitutionCipherBtn = new JButton("Mã hoá thay thế");
+		shiftCipherBtn = new JButton("Mã hoá dịch chuyển");
+		symmetricEncryptionBtn = new JButton("Mã hoá đối xứng");
+		asymmetricEncryptionBtn = new JButton("Mã hoá bất đối xứng");
 		
-		mainPanel.add(classicEncryptBtn);
-		mainPanel.add(symmetricEncryptionbtn);
-		mainPanel.add(asymmetricEncryptionbtn);
+		mainPanel.add(substitutionCipherBtn);
+		mainPanel.add(shiftCipherBtn);
+		mainPanel.add(symmetricEncryptionBtn);
+		mainPanel.add(asymmetricEncryptionBtn);
 		
 		mainFrame.add(mainPanel);
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setVisible(true);
 	}
 	
-	public JButton getClassicEncryptBtn() {
-		return classicEncryptBtn;
+	public JButton getSubstitutionCipherBtn() {
+		return substitutionCipherBtn;
 	}
-	public JButton getSymmetricEncryptionBtn() {
-		return symmetricEncryptionbtn;
+
+	public JButton getShiftCipherBtn() {
+		return shiftCipherBtn;
 	}
-	public JButton getAsymmetricEncryptionBtn() {
-		return asymmetricEncryptionbtn;
-	}
-	
+
 	public static void main(String[] args) {
 		View view = new View();
 	}
