@@ -2,11 +2,15 @@ package controller;
 
 import javax.swing.JOptionPane;
 
+import model.classicialcipher.PermutationCipher;
 import model.classicialcipher.ShiftCipher;
 import model.classicialcipher.SubstitutionCipher;
+import model.classicialcipher.VigenereCipher;
+import view.PermutationCipherView;
 import view.ShiftCipherView;
 import view.SubstitutionCipherView;
 import view.View;
+import view.VigenereCipherView;
 
 public class ViewController {
 	private View view;
@@ -19,6 +23,7 @@ public class ViewController {
 	private void initController() {
 		view.getSubstitutionCipherBtn().addActionListener(e ->  openSubstitutionView());
 		view.getShiftCipherBtn().addActionListener(e -> openShiftCipherView());
+		view.getVigenereCipherBtin().addActionListener(e -> openShiftCipherView());
 	}
 
 	private void openSubstitutionView() {
@@ -31,6 +36,18 @@ public class ViewController {
 		ShiftCipherView shiftView = new ShiftCipherView();
 		ShiftCipher shiftModel = new ShiftCipher();
 		new ShiftCipherConttroler(shiftModel, shiftView); 
+	}
+	
+	private void openVigenereCipherView() {
+		VigenereCipherView vigenereView = new VigenereCipherView();
+		VigenereCipher vigenereCipher = new VigenereCipher();
+		new VigenereCipherController(vigenereCipher, vigenereView);
+	}
+	
+	private void openPermuationCipherView() {
+		PermutationCipherView permuationView = new PermutationCipherView();
+		PermutationCipher perCipher = new PermutationCipher();
+		new PermutationCipherController(perCipher, permuationView);
 	}
 
 	private void showNotImplemented() {

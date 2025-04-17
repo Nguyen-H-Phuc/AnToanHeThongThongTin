@@ -139,8 +139,13 @@ public abstract class ClassicalCipherView {
 	
 	public abstract void createKeyPanel();
 	
-	public String showFileDialog(String title) {
-	    FileDialog fileDialog = new FileDialog(frame, title, FileDialog.SAVE);
+	public String showFileDialog(String title, boolean saveDialog) {
+		FileDialog fileDialog;
+		if(saveDialog) {
+	    fileDialog = new FileDialog(frame, title, FileDialog.SAVE);}
+		else {
+		   fileDialog = new FileDialog(frame, title, FileDialog.LOAD);
+		}
 	    fileDialog.setVisible(true);
 
 	    String directory = fileDialog.getDirectory();
@@ -200,23 +205,20 @@ public abstract class ClassicalCipherView {
 		return saveResultBtn;
 	}
 
-	public JTextArea getInputText() {
-		return inputText;
-	}
-
-	public void setInputText(JTextArea inputText) {
-		this.inputText = inputText;
-	}
-
-	public JTextArea getOutputText() {
-		return outputText;
-	}
-
-	public void setOutputText(JTextArea outputText) {
-		this.outputText = outputText;
-	}
-	
-	public String getText() {
+	public String getInputText() {
 		return this.inputText.getText();
 	}
+
+	public void setInputText(String text) {
+		this.inputText.setText(text);;
+	}
+
+	public String getOutputText() {
+		return this.outputText.getText();
+	}
+
+	public void setOutputText(String text) {
+		this.outputText.setText(text);;
+	}
+
 }

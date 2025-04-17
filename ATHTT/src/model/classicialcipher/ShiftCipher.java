@@ -11,7 +11,6 @@ import java.util.Random;
 public class ShiftCipher extends ClasscialCipher {
 
 
-
     // Hàm mã hóa
 	public void encryptText(int shift) {
 		StringBuilder result = new StringBuilder();
@@ -82,15 +81,4 @@ public class ShiftCipher extends ClasscialCipher {
 
     }
 
-	@Override
-	public String encryptText() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String decryptText() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
