@@ -10,7 +10,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,7 +24,7 @@ public abstract class ClassicalCipherView {
 	private JLabel labelInput, labelOutput;
 	private JTextArea inputText, outputText;
 	private JTextField sourceFilePath, destFilePath;
-	private JButton encryptTextBtn, decryptTextBtn, saveResultBtn, encryptFileBtn, decryptFileBtn;
+	private JButton encryptTextBtn, decryptTextBtn, saveResultBtn, encryptFileBtn, decryptFileBtn, genKey, loadKey, saveKey;
 	private JPanel textPanel, filePanel;
 	
 	public void createFrame(int height, int width, String title) {
@@ -157,7 +156,6 @@ public abstract class ClassicalCipherView {
 	    return "";
 	}
 
-	
 	public void showDialogMessage(String message, String type) {
 		switch (type.toUpperCase()) {
 		case "ERROR":
@@ -178,13 +176,11 @@ public abstract class ClassicalCipherView {
 				JOptionPane.WARNING_MESSAGE);
 		return result;
 	}
-	
-	
+		
 	public JFrame getFrame() {
 		return frame;
 	}
 	
-
 	public JPanel getTextPanel() {
 		return textPanel;
 	}
@@ -219,6 +215,30 @@ public abstract class ClassicalCipherView {
 
 	public void setOutputText(String text) {
 		this.outputText.setText(text);;
+	}
+
+	public JButton getGenKey() {
+		return genKey;
+	}
+
+	public JButton getLoadKey() {
+		return loadKey;
+	}
+
+	public JButton getSaveKey() {
+		return saveKey;
+	}
+	
+	public void setGenKey(String keyName) {
+		this.genKey = new JButton(keyName);
+	}
+	
+	public void setLoadKey(String keyName) {
+		this.loadKey = new JButton(keyName);
+	}
+	
+	public void setSaveKey(String keyName) {
+		this.saveKey = new JButton(keyName);
 	}
 
 }

@@ -9,7 +9,8 @@ public abstract class ClasscialCipher {
 	private String output;
 	private static final String VIETNAMESE_ALPHABET = "AĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXY" + "aăâbcdđeêghiklmnoôơpqrstuưvxy"
 			+ "ÁÀẢÃẠẮẰẲẴẶẤẦẨẪẬÉÈẺẼẸẾỀỂỄỆÍÌỈĨỊ" + "áàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩị" + "ÓÒỎÕỌỐỒỔỖỘỚỜỞỠỢÚÙỦŨỤỨỪỬỮỰÝỲỶỸỴ"
-			+ "óòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ";
+			+ "óòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ";	
+	private static final int LENGTH_VIETNAMESE_ALPHABET = VIETNAMESE_ALPHABET.length();
 	
 	public String saveOutputToFile(String output, String filePath) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
@@ -40,6 +41,11 @@ public abstract class ClasscialCipher {
 
 	public static String getVietnameseAlphabet() {
 		return VIETNAMESE_ALPHABET;
+	}
+
+	
+	public static int getLengthVietnameseAlphabet() {
+		return LENGTH_VIETNAMESE_ALPHABET;
 	}
 
 }

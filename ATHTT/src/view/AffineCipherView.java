@@ -11,17 +11,17 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 
-public class ShiftCipherView extends ClassicalCipherView {
+public class AffineCipherView extends ClassicalCipherView {
 	JPanel keyPanel;
-	JSpinner spinner;
-	
-	public ShiftCipherView() {
+	JSpinner spinner1, spinner2;
+
+	public AffineCipherView() {
 		super();
-		createFrame(700, 600, "Shift cipher tool");
+		createFrame(700, 600, "Affine cipher tool");
 		createPanelTextCipher();
 		createFileCipherPanel();
 		createKeyPanel();
-		this.getFrame().setLayout(new BorderLayout(10, 10));		
+		this.getFrame().setLayout(new BorderLayout(10, 10));
 		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
 		this.getFrame().add(this.getFilePanel(), BorderLayout.SOUTH);
 		this.getFrame().add(keyPanel, BorderLayout.NORTH);
@@ -30,9 +30,11 @@ public class ShiftCipherView extends ClassicalCipherView {
 
 	@Override
 	public void createKeyPanel() {
-		SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 100, 1);
-		spinner = new JSpinner(model);
-
+		SpinnerNumberModel model1 = new SpinnerNumberModel(1, 1, 178, 1);
+		SpinnerNumberModel model2 = new SpinnerNumberModel(1, 1, 178, 1);
+		spinner1 = new JSpinner(model1);
+		spinner2 = new JSpinner(model2);
+		
 		// Tạo formatter để chỉ cho nhập số
 		NumberFormat format = NumberFormat.getIntegerInstance();
 		format.setGroupingUsed(false);
@@ -42,26 +44,40 @@ public class ShiftCipherView extends ClassicalCipherView {
 		formatter.setMinimum(0);
 		formatter.setMaximum(100);
 
-		JFormattedTextField tf = ((JSpinner.NumberEditor) spinner.getEditor()).getTextField();
-		tf.setFormatterFactory(new DefaultFormatterFactory(formatter));
+		JFormattedTextField tf1 = ((JSpinner.NumberEditor) spinner1.getEditor()).getTextField();
+		JFormattedTextField tf2 = ((JSpinner.NumberEditor) spinner2.getEditor()).getTextField();
+		tf1.setFormatterFactory(new DefaultFormatterFactory(formatter));
+		tf2.setFormatterFactory(new DefaultFormatterFactory(formatter));
+		
 		this.setGenKey("Tạo khoá");
+		this.setLoadKey("Tải khoá");
 		this.setSaveKey("Lưu khoá");
-		this.setSaveKey("Tải khoá");
 		keyPanel = new JPanel(new FlowLayout());
-		keyPanel.add(spinner);
+		keyPanel.add(spinner1);
+		keyPanel.add(spinner2);
 		keyPanel.add(this.getGenKey());
 		keyPanel.add(this.getLoadKey());
 		keyPanel.add(this.getSaveKey());
 
 	}
 	
-	public void setValueSpinner(int value) {
-		spinner.setValue(value);
+	public void setValueSpinner1(int value) {
+		spinner1.setValue(value);
 	}
 	
-	public int getValueSpinner() {
-		return (int) spinner.getValue();
+	public int getValueSpinner1() {
+		return (int) spinner1.getValue();
 	}
 	
+	public void setValueSpinner2(int value) {
+		spinner2.setValue(value);
+	}
+	
+	public int getValueSpinner2() {
+		return (int) spinner2.getValue();
+	}
 
+	public static void main(String[] args) {
+		AffineCipherView affcipher = new AffineCipherView();
+	}
 }

@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.text.NumberFormat;
 
-import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -18,7 +17,6 @@ import javax.swing.text.NumberFormatter;
 
 public class VigenereCipherView extends ClassicalCipherView {
 	JPanel keyPanel;
-	JButton genKey, saveKey, loadKey;
 	JSpinner spinner;
 	JTextField key;
 
@@ -51,9 +49,9 @@ public class VigenereCipherView extends ClassicalCipherView {
 		tf.setFormatterFactory(new DefaultFormatterFactory(formatter));
 		
 		key = new JTextField();
-		genKey = new JButton("Tạo khoá");
-		saveKey = new JButton("Lưu khoá");
-		loadKey = new JButton("Tải khoá");
+		this.setGenKey("Tạo khoá");
+		this.setSaveKey("Lưu khoá");
+		this.setSaveKey("Tải khoá");
 		keyPanel = new JPanel(new GridLayout(2,1));
 		JPanel optionKeyPanel = new JPanel(new FlowLayout());
 		key.setPreferredSize(new Dimension(200, 25));
@@ -65,37 +63,13 @@ public class VigenereCipherView extends ClassicalCipherView {
 		optionKeyPanel.add(key);
 		
 		JPanel keyBtnPanel = new JPanel(new FlowLayout());
-		keyBtnPanel.add(genKey);
-		keyBtnPanel.add(loadKey);
-		keyBtnPanel.add(saveKey);
+		keyPanel.add(this.getGenKey());
+		keyPanel.add(this.getLoadKey());
+		keyPanel.add(this.getSaveKey());
 		keyPanel.add(optionKeyPanel);
 		keyPanel.add(keyBtnPanel);
 	}
 	
-	public JButton getGenKey() {
-		return genKey;
-	}
-
-	public void setGenKey(JButton genKey) {
-		this.genKey = genKey;
-	}
-
-	public JButton getSaveKey() {
-		return saveKey;
-	}
-
-	public void setSaveKey(JButton saveKey) {
-		this.saveKey = saveKey;
-	}
-
-	public JButton getLoadKey() {
-		return loadKey;
-	}
-
-	public void setLoadKey(JButton loadKey) {
-		this.loadKey = loadKey;
-	}
-
 	public void setValueSpinner(int value) {
 		spinner.setValue(value);
 	}
