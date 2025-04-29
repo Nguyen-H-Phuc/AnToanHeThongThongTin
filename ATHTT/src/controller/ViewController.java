@@ -25,6 +25,7 @@ public class ViewController {
 		view.getShiftCipherBtn().addActionListener(e -> openShiftCipherView());
 		view.getVigenereCipherBtin().addActionListener(e -> openShiftCipherView());
 		
+		view.getAsymmetricEncryptionBtn().addActionListener(e -> openRSAView());
 		view.getHashBtn().addActionListener(e -> openHashView());
 	}
 
@@ -50,6 +51,10 @@ public class ViewController {
 		PermutationCipherView permuationView = new PermutationCipherView();
 		PermutationCipher perCipher = new PermutationCipher();
 		new PermutationCipherController(perCipher, permuationView);
+	}
+	
+	private void openRSAView() {
+		RSAController rsaController = new RSAController();
 	}
 	
 	private void openHashView() {

@@ -200,6 +200,14 @@ public abstract class ClassicalCipherView {
 		return saveResultBtn;
 	}
 
+	public JButton getEncryptFileBtn() {
+		return encryptFileBtn;
+	}
+
+	public JButton getDecryptFileBtn() {
+		return decryptFileBtn;
+	}
+
 	public String getInputText() {
 		return this.inputText.getText();
 	}

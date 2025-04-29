@@ -59,6 +59,10 @@ public class View extends JFrame {
 		return permutationCipher;
 	}
 	
+	public JButton getAsymmetricEncryptionBtn() {
+		return asymmetricEncryptionBtn;
+	}
+	
 	public JButton getHashBtn() {
 		return hashBtn;
 	}

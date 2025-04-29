@@ -9,9 +9,8 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Provider;
 import java.security.Security;
-import java.util.Set;
+
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -60,26 +59,4 @@ public class HashUtil {
 	    return hash;
 	}
 	
-	
-	 public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException {
-//	        Set<String> algorithms = Security.getAlgorithms("MessageDigest");
-//	        for (String algo : algorithms) {
-//	            System.out.println(algo);
-//	        }
-
-//	        HashUtil hash = new HashUtil();
-//	        System.out.println(hash.hashText("50 năm ngày giải phóng miền nam", "1.2.804.2.1.1.1.1.2.2.1"));
-//	        int i =0;
-//	        for (Provider provider : Security.getProviders()) {
-//	            System.out.println("Provider: " + provider.getName());
-//	            Set<Provider.Service> services = provider.getServices();
-//	            for (Provider.Service service : services) {
-//	                if ("MessageDigest".equalsIgnoreCase(service.getType())) {
-//	                	i++;
-//	                    System.out.println(i+". " + service.getAlgorithm());
-//	                }
-//	            }
-//	        }
-
-	    }
 }

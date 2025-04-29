@@ -7,11 +7,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
+import java.security.Security;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -22,22 +28,21 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 public class RSA {
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
 	private SecretKey secretKey;
+	
 
-	public void genKey() {
-		try {
-			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+
+	public void genKey(String instance) throws NoSuchAlgorithmException {
+			KeyPairGenerator kpg = KeyPairGenerator.getInstance(instance);
 			kpg.initialize(1024);
 			KeyPair kp = kpg.genKeyPair();
-
 			publicKey = kp.getPublic();
 			privateKey = kp.getPrivate();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void genSecretKey(String instance, int keySize) {
@@ -50,30 +55,29 @@ public class RSA {
 		}
 	}
 
-	public byte[] encrypt(String data) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-		Cipher cipher = Cipher.getInstance("RSA");
+	public byte[] encrypt(String data, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+		Cipher cipher = Cipher.getInstance(instance);
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 		return cipher.doFinal(data.getBytes("UTF-8"));
 	}
 
-	public String encryptString(String data) throws InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-		return Base64.getEncoder().encodeToString(encrypt(data));
+	public String encryptString(String data, String instance) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+		return Base64.getEncoder().encodeToString(encrypt(data, instance));
 	}
 
-	public String decrypt(byte[] encryptedData) throws NoSuchAlgorithmException, NoSuchPaddingException,
+	public String decrypt(byte[] encryptedData, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-		Cipher cipher = Cipher.getInstance("RSA");
+		Cipher cipher = Cipher.getInstance(instance);
 		cipher.init(Cipher.DECRYPT_MODE, privateKey);
 		byte[] decryptedBytes = cipher.doFinal(encryptedData);
 		return new String(decryptedBytes, "UTF-8");
 	}
 
-	public String decryptString(String encryptedBase64) throws NoSuchAlgorithmException, NoSuchPaddingException,
+	public String decryptString(String encryptedBase64, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 		byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
-		return decrypt(encryptedBytes);
+		return decrypt(encryptedBytes, instance);
 	}
 
 	public String encryptSercetKey() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
@@ -106,6 +110,51 @@ public class RSA {
 		dos2.close();
 		cos.close();
 		dos1.close();
+		
+	}
+	
+	
+	public String getPublicKey() {
+	    return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+	}
+	
+	
+	public String getPrivateKey() {
+	    return Base64.getEncoder().encodeToString(privateKey.getEncoded());
+	}
+	
+	public void setPublicKey(String base64PublicKey) {
+	    try {
+	        byte[] decodedKey = Base64.getDecoder().decode(base64PublicKey);
+	        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
+	        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+	        this.publicKey = keyFactory.generatePublic(keySpec);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	public void setPrivateKey(String base64PrivateKey) {
+	    try {
+	        byte[] decodedKey = Base64.getDecoder().decode(base64PrivateKey);
+	        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
+	        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+	        this.privateKey = keyFactory.generatePrivate(keySpec);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	
+	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
+		Security.addProvider(new BouncyCastleProvider());
+		for (Provider provider : Security.getProviders()) {
+		    for (Provider.Service service : provider.getServices()) {
+		        if (service.getType().equals("Cipher") && service.getAlgorithm().contains("RSA")) {
+		            System.out.println("Cipher: " + service.getAlgorithm() + " - " + provider.getName());
+		        }
+		    }
+		}
 		
 	}
 
