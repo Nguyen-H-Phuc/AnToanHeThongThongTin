@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class View extends JFrame {
-	private JButton substitutionCipherBtn, shiftCipherBtn, vigenereCipherBtin, permutationCipher, symmetricEncryptionBtn, asymmetricEncryptionBtn ;
+	private JButton substitutionCipherBtn, shiftCipherBtn, vigenereCipherBtin, permutationCipher, symmetricEncryptionBtn, asymmetricEncryptionBtn, hashBtn;
 	private JFrame mainFrame;
 	private JPanel mainPanel;
 
@@ -27,6 +27,7 @@ public class View extends JFrame {
 		
 		symmetricEncryptionBtn = new JButton("Mã hoá đối xứng");
 		asymmetricEncryptionBtn = new JButton("Mã hoá bất đối xứng");
+		hashBtn = new JButton("Hash");
 		
 		mainPanel.add(substitutionCipherBtn);
 		mainPanel.add(shiftCipherBtn);
@@ -35,6 +36,7 @@ public class View extends JFrame {
 		
 		mainPanel.add(symmetricEncryptionBtn);
 		mainPanel.add(asymmetricEncryptionBtn);
+		mainPanel.add(hashBtn);
 		
 		mainFrame.add(mainPanel);
 		mainFrame.setLocationRelativeTo(null);
@@ -55,6 +57,10 @@ public class View extends JFrame {
 
 	public JButton getPermutationCipher() {
 		return permutationCipher;
+	}
+	
+	public JButton getHashBtn() {
+		return hashBtn;
 	}
 
 }

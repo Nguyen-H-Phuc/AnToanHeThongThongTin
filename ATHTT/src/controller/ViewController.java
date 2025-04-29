@@ -24,6 +24,8 @@ public class ViewController {
 		view.getSubstitutionCipherBtn().addActionListener(e ->  openSubstitutionView());
 		view.getShiftCipherBtn().addActionListener(e -> openShiftCipherView());
 		view.getVigenereCipherBtin().addActionListener(e -> openShiftCipherView());
+		
+		view.getHashBtn().addActionListener(e -> openHashView());
 	}
 
 	private void openSubstitutionView() {
@@ -48,6 +50,10 @@ public class ViewController {
 		PermutationCipherView permuationView = new PermutationCipherView();
 		PermutationCipher perCipher = new PermutationCipher();
 		new PermutationCipherController(perCipher, permuationView);
+	}
+	
+	private void openHashView() {
+		HashController hashController = new HashController();
 	}
 
 	private void showNotImplemented() {
