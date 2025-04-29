@@ -168,7 +168,6 @@ public abstract class ClassicalCipherView {
 			JOptionPane.showMessageDialog(null, message, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
 			break;
 		}
-
 	}
 
 	public int showYesNoDialog(String message1, String message2) {

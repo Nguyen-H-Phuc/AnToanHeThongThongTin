@@ -44,9 +44,10 @@ public class ShiftCipherView extends ClassicalCipherView {
 
 		JFormattedTextField tf = ((JSpinner.NumberEditor) spinner.getEditor()).getTextField();
 		tf.setFormatterFactory(new DefaultFormatterFactory(formatter));
+		keyPanel = new JPanel();
 		this.setGenKey("Tạo khoá");
 		this.setSaveKey("Lưu khoá");
-		this.setSaveKey("Tải khoá");
+		this.setLoadKey("Tải khoá");
 		keyPanel = new JPanel(new FlowLayout());
 		keyPanel.add(spinner);
 		keyPanel.add(this.getGenKey());
