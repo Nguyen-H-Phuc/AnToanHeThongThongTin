@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -23,8 +25,8 @@ public abstract class ClassicalCipherView {
 	private JFrame frame;
 	private JLabel labelInput, labelOutput;
 	private JTextArea inputText, outputText;
-	private JTextField sourceFilePath, destFilePath;
-	private JButton encryptTextBtn, decryptTextBtn, saveResultBtn, encryptFileBtn, decryptFileBtn, genKey, loadKey, saveKey;
+	private JTextField srcFile, destFile;
+	private JButton encryptTextBtn, decryptTextBtn, saveResultBtn, clearTextPanelBtn, swapBtn,  encryptFileBtn, decryptFileBtn, genKey, loadKey, saveKey;
 	private JPanel textPanel, filePanel;
 	
 	public void createFrame(int height, int width, String title) {
@@ -66,9 +68,13 @@ public abstract class ClassicalCipherView {
         encryptTextBtn = new JButton("Mã hóa văn bản");
         decryptTextBtn = new JButton("Giải mã văn bản");
         saveResultBtn = new JButton("Lưu kết quả");
+        clearTextPanelBtn = new JButton("Clear");
+        swapBtn = new JButton("Hoán đổi");
         textBtnPanel.add(encryptTextBtn);
         textBtnPanel.add(decryptTextBtn);
         textBtnPanel.add(saveResultBtn);
+        textBtnPanel.add(clearTextPanelBtn);
+        textBtnPanel.add(swapBtn);
 
         textPanel.add(inputPanel);
         textPanel.add(Box.createVerticalStrut(10));
@@ -85,17 +91,17 @@ public abstract class ClassicalCipherView {
         // === Source file panel with button ===
         JLabel labelSource = new JLabel("Đường dẫn file nguồn:");
         JPanel sourcePanel = new JPanel(new BorderLayout());
-        sourceFilePath = new JTextField();
+        srcFile = new JTextField();
         JButton browseSourceBtn = new JButton("...");
-        sourcePanel.add(sourceFilePath, BorderLayout.CENTER);
+        sourcePanel.add(srcFile, BorderLayout.CENTER);
         sourcePanel.add(browseSourceBtn, BorderLayout.EAST);
 
         // === Dest file panel with button ===
         JLabel labelDest = new JLabel("Đường dẫn file đích:");
         JPanel destPanel = new JPanel(new BorderLayout());
-        destFilePath = new JTextField();
+        destFile = new JTextField();
         JButton browseDestBtn = new JButton("...");
-        destPanel.add(destFilePath, BorderLayout.CENTER);
+        destPanel.add(destFile, BorderLayout.CENTER);
         destPanel.add(browseDestBtn, BorderLayout.EAST);
 
         // === Button panel ===
@@ -121,7 +127,7 @@ public abstract class ClassicalCipherView {
             fileDialog.setVisible(true);
             if (fileDialog.getFile() != null) {
                 String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
-                sourceFilePath.setText(selectedFile);
+                srcFile.setText(selectedFile);
             }
         });
 
@@ -131,9 +137,22 @@ public abstract class ClassicalCipherView {
             fileDialog.setVisible(true);
             if (fileDialog.getFile() != null) {
                 String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
-                destFilePath.setText(selectedFile);
+                destFile.setText(selectedFile);
             }
         });
+        setSwapBtn();
+        
+	}
+	
+	public void setSwapBtn() {
+		String textSwap = getInputText();
+		setInputText(getOutputText());
+		setOutputText(textSwap);
+	}
+	
+	public void setClearBtn() {
+		this.setInputText("");
+		this.setOutputText("");
 	}
 	
 	public abstract void createKeyPanel();
@@ -236,6 +255,14 @@ public abstract class ClassicalCipherView {
 		return saveKey;
 	}
 	
+	public JButton getClearTextPanelBtn() {
+		return clearTextPanelBtn;
+	}
+
+	public JButton getSwapBtn() {
+		return swapBtn;
+	}
+
 	public void setGenKey(String keyName) {
 		this.genKey = new JButton(keyName);
 	}
@@ -248,4 +275,19 @@ public abstract class ClassicalCipherView {
 		this.saveKey = new JButton(keyName);
 	}
 
+	public String getSrcFile() {
+		return this.srcFile.getText();
+	}
+	
+	public String getDestFile() {
+		return this.destFile.getText();
+	}
+	
+	public JTextArea getInputTextArea() {
+		return this.inputText;
+	}
+	
+	public JTextArea getOutputTextArea() {
+		return this.outputText;
+	}
 }

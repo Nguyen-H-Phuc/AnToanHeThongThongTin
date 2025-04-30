@@ -6,30 +6,32 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.swing.JOptionPane;
 
 import model.RSA;
 import view.RSAView;
+import view.ViewUtils;
 
 public class RSAController {
 	private RSA model;
 	private RSAView view;
 
 	public RSAController() {
+		super();
+		
 		this.model = new RSA();
 		this.view = new RSAView();
-
 		this.view.getGenKey().addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					model.genKey(view.getAlgorithm().substring(0, 3));
+					int keySize = view.getKeySize();
+					model.genKey(view.getAlgorithm().substring(0, 3), keySize);
 				} catch (NoSuchAlgorithmException e1) {
 					e1.printStackTrace();
 				}
@@ -42,8 +44,7 @@ public class RSAController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-
+				saveKey(true);
 			}
 		});
 
@@ -51,7 +52,24 @@ public class RSAController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				loadKey(true);
+
+			}
+		});
+		
+		this.view.getSavePrivateKey().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				saveKey(false);
+			}
+		});
+		
+		this.view.getLoadPrivateKey().addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				loadKey(false);
 
 			}
 		});
@@ -78,13 +96,8 @@ public class RSAController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
 					handleFile("ENCRYPT");
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
+				
 			}
 		});
 
@@ -92,81 +105,172 @@ public class RSAController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
 					handleFile("DECRYPT");
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 
 			}
 		});
+		ViewUtils.setupClearButton(view.getClearTextPanelBtn(), view.getInputTextArea(), view.getOutputTextArea());
 	}
 	
-	private void setKey() {
-		String privateKey = this.view.getPrivateKey();
-		String publicKey = this.view.getPublicKey();
-		if (!privateKey.isEmpty() && !publicKey.isEmpty()) {
-			this.model.setPublicKey(publicKey);
-			this.model.setPrivateKey(privateKey);
-		}
+	private void setPublicKey() {
+	    String publicKey = this.view.getPublicKey();
+	    if (!publicKey.isEmpty()) {
+	        try {
+	            this.model.setPublicKey(publicKey);
+	        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+	            this.view.showDialogMessage("Khoá không hợp lệ:\n" + e.getMessage(), "ERROR");
+	        } catch (Exception e) {
+	            this.view.showDialogMessage("Đã xảy ra lỗi không xác định khi xử lý khoá.", "ERROR");
+	        }
+	    } else {
+	        this.view.showDialogMessage("Vui lòng nhập khoá công khai.", "ERROR");
+	    }
+	}
+	
+	private void setPrivateKey() {
+	    String privateKey = this.view.getPrivateKey();
+	    this.model.clearPrivateKey();
+	    if (!privateKey.trim().isEmpty()) {
+	         // xoá khóa cũ trước
+	        try {
+	            this.model.setPrivateKey(privateKey);
+	        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+	            this.view.showDialogMessage("Khoá không hợp lệ:\n" + e.getMessage(), "ERROR");
+	        } catch (Exception e) {
+	            this.view.showDialogMessage("Đã xảy ra lỗi không xác định khi xử lý khoá.", "ERROR");
+	        }
+	    } else {
+	        this.view.showDialogMessage("Vui lòng nhập hoá riêng tư.", "ERROR");
+	       
+	    }
 	}
 
 	private void handleText(String mode) {
-		setKey();
-
 		String algorithm = this.view.getAlgorithm();
 		String input = this.view.getInputText();
 		String output;
 		try {
 			if (mode.equals("ENCRYPT")) {
+				setPublicKey();
 				output = this.model.encryptString(input, algorithm);
 			} else {
+				setPrivateKey();
 				output = this.model.decryptString(input, algorithm);
 			}
 			this.view.setOutputText(output);
 		} catch (InvalidKeyException e) {
-			if (this.view.getPublicKey().isEmpty() || this.view.getPrivateKey().isEmpty()) {
-				this.view.showDialogMessage(
-						"Vui lòng tạo khoá công khai và khoá riêng tư trước khi mã hoá hoặc giải mã.", "WARNING");
-			} else {
-				JOptionPane.showMessageDialog(null, "Lỗi khóa không hợp lệ: " + e.getMessage());
-			}
+			// thong bao loi trong setKey();
+			this.view.setOutputText("");
 		} catch (NoSuchAlgorithmException e) {
 			this.view.showDialogMessage("Thuật toán không tồn tại: " + e.getMessage(), "ERROR");
+			this.view.setOutputText("");
 		} catch (NoSuchPaddingException e) {
 			this.view.showDialogMessage("Padding không hợp lệ: " + e.getMessage(), "ERROR");
+			this.view.setOutputText("");
 		} catch (IllegalBlockSizeException e) {
 			this.view.showDialogMessage("Kích thước khối sai: " + e.getMessage(), "ERROR");
+			this.view.setOutputText("");
 		} catch (BadPaddingException e) {
 			this.view.showDialogMessage("Sai padding hoặc dữ liệu không hợp lệ: " + e.getMessage(), "ERROR");
+			this.view.setOutputText("");
 		} catch (UnsupportedEncodingException e) {
 			this.view.showDialogMessage("Encoding không hỗ trợ: " + e.getMessage(), "ERROR");
+			this.view.setOutputText("");
+		} catch(IllegalArgumentException e){
+			this.view.showDialogMessage("Dữ liệu đầu vào không phải Base64 hợp lệ. " + e.getMessage(), "ERROR");
+			this.view.setOutputText("");
 		}
 	}
 
-	private void handleFile(String mode) throws Exception {
-		setKey();
+	private void handleFile(String mode) {
 		String algorithm = this.view.getAlgorithm();
 		String srcFile = view.getSrcFile();
 		String destFile = view.getDestFile();
-		if(mode.equals("ENCRYPT")) {
+
+		if (srcFile == null || srcFile.isEmpty() || destFile == null || destFile.isEmpty()) {
+			this.view.showDialogMessage("Vui lòng chọn file nguồn và file đích.", "WARNING");
+			return;
+		}
+
+		if (mode.equals("ENCRYPT")) {
 			model.genSecretKey("AES", 128);
 			try {
-				this.model.encryptFile(srcFile, destFile);
-			} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-					| BadPaddingException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				setPublicKey();
+				this.model.encryptFile(srcFile, destFile, algorithm);
+				this.view.showDialogMessage("Mã hoá file thành công. File được lưu tại "+ destFile, "INFO");
+			} catch (InvalidKeyException e) {
+				// thong bao loi trong setKey(); 
+			} catch (Exception e) {
+				this.view.showDialogMessage("Lỗi " + e.getMessage(), "ERROR");
 			}
-		} else {try {
-			this.model.decryptFile(srcFile, destFile);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} else {
+			try {
+				setPrivateKey();
+				this.model.decryptFile(srcFile, destFile, algorithm);
+				this.view.showDialogMessage("Giải mã file thành công. File được lưu tại "+ destFile, "INFO");
+			} catch (InvalidKeyException e) {
+				// thong bao loi trong setKey(); 
+			} catch (Exception e) {
+				this.view.showDialogMessage("Lỗi " + e.getMessage(), "ERROR");
+			}
 		}
+
+	}
+
+	private void saveKey(boolean savePulicKey) {
+		if(savePulicKey) {
+			String filePath = view.showFileDialog("Chọn file chứa khoá công khai", true);
+			try {
+				model.savePublicKey(view.getPublicKey(), filePath);
+			} catch (IOException e) {
+				view.showDialogMessage("Lỗi đọc file" + e.getMessage(), "ERROR");
 			}
+		}else {
+			String filePath = view.showFileDialog("Chọn file chứa khoá riêng tư", true);
+			try {
+				model.savePublicKey(view.getPublicKey(), filePath);
+			} catch (IOException e) {
+				view.showDialogMessage("Lỗi đọc file" + e.getMessage(), "ERROR");
+			}
+		}
+	}
+	
+	private void loadKey(boolean loadPublicKey) {
+		if (loadPublicKey) {
+			String filePath = this.view.showFileDialog("Chọn file để tải khoá công khai", false);
+			if (!filePath.isEmpty()) {
+				try {
+					this.model.loadPublicKey(filePath);
+					this.view.setPublicKey(this.model.getPublicKey());
+				} catch (NoSuchAlgorithmException e) {
+					this.view.showDialogMessage("Khoá không được hỗ trợ.", "ERROR");
+					e.printStackTrace();
+				} catch (InvalidKeySpecException e) {
+					this.view.showDialogMessage("Khoá bị lỗi.", "ERROR");
+				} catch (IOException e) {
+					this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");
+				}
+			}
+		} else {
+			String filePath = this.view.showFileDialog("Chọn file để tải khoá công khai", false);
+			if (!filePath.isEmpty()) {
+				try {
+					this.model.loadPrivateKey(filePath);
+					this.view.setPublicKey(this.model.getPrivateKey());
+				} catch (NoSuchAlgorithmException e) {
+					this.view.showDialogMessage("Khoá không được hỗ trợ.", "ERROR");
+					e.printStackTrace();
+				} catch (InvalidKeySpecException e) {
+					this.view.showDialogMessage("Khoá bị lỗi.", "ERROR");
+				} catch (IOException e) {
+					this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");
+				}
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+		new RSAController();
 	}
 
 }

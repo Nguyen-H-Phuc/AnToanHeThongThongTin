@@ -2,71 +2,111 @@ package model;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.PublicKey;
-import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class RSA {
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
-	private SecretKey secretKey;
 	
-
-
-	public void genKey(String instance) throws NoSuchAlgorithmException {
+	public void genKey(String instance, int keySize) throws NoSuchAlgorithmException {
 			KeyPairGenerator kpg = KeyPairGenerator.getInstance(instance);
-			kpg.initialize(1024);
+			kpg.initialize(keySize);
 			KeyPair kp = kpg.genKeyPair();
 			publicKey = kp.getPublic();
 			privateKey = kp.getPrivate();
 	}
+	
+	public String savePublicKey(String publicKey, String filePath) throws IOException {
+		FileWriter writer = new FileWriter(filePath);
+		writer.write("-----BEGIN PUBLIC KEY-----\n");
+		writer.write(publicKey);
+		writer.write("\n-----END PUBLIC KEY-----\n");
+		writer.close();
+		return "Lưu khoá công khai thành công " + "\n" + "Khoá công khai được lưu tại: " + filePath;
+	}
+	
+	public String savePrivateKey(String privateKey, String filePath) throws IOException {
+		FileWriter writer = new FileWriter(filePath);
+		writer.write("-----BEGIN PRIVATE KEY-----\n");
+		writer.write(privateKey);
+		writer.write("\n-----END PRIVATE KEY-----\n");
+		writer.close();
+		return "Lưu khoá riêng tư thành công " + "\n" + "Khoá riêng tư được lưu tại: " + filePath;
+	}
+	
+	public void loadPublicKey(String filePath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+	    String content = Files.readString(Paths.get(filePath));
+	    String keyBase64 = content
+	        .replace("-----BEGIN PUBLIC KEY-----", "")
+	        .replace("-----END PUBLIC KEY-----", "")
+	        .replaceAll("\\s", "");
 
-	public void genSecretKey(String instance, int keySize) {
+	    setPublicKey(keyBase64);
+	}
+	
+	public void loadPrivateKey(String filePath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException  {
+	    String content = Files.readString(Paths.get(filePath));
+	    String keyBase64 = content
+	        .replace("-----BEGIN PRIVATE KEY-----", "")
+	        .replace("-----END PRIVATE KEY-----", "")
+	        .replaceAll("\\s", "");
+
+	    setPrivateKey(keyBase64);
+	}
+
+	public SecretKey genSecretKey(String instance, int keySize) {
 		try {
 			KeyGenerator generator = KeyGenerator.getInstance(instance);
 			generator.init(keySize);
-			secretKey = generator.generateKey();
+			return generator.generateKey();
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public byte[] encrypt(String data, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
+	public byte[] encryptByte(String data, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 		Cipher cipher = Cipher.getInstance(instance);
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 		return cipher.doFinal(data.getBytes("UTF-8"));
 	}
 
-	public String encryptString(String data, String instance) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-		return Base64.getEncoder().encodeToString(encrypt(data, instance));
+	public String encryptString(String data, String instance) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+		return Base64.getEncoder().encodeToString(encryptByte(data, instance));
 	}
 
-	public String decrypt(byte[] encryptedData, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
+	public String decryptByte(byte[] encryptedData, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 		Cipher cipher = Cipher.getInstance(instance);
 		cipher.init(Cipher.DECRYPT_MODE, privateKey);
@@ -75,14 +115,14 @@ public class RSA {
 	}
 
 	public String decryptString(String encryptedBase64, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, IllegalArgumentException {
 		byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
-		return decrypt(encryptedBytes, instance);
+		return decryptByte(encryptedBytes, instance);
 	}
 
-	public String encryptSercetKey() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+	public String encryptSercetKey(SecretKey secretKey, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException {
-		Cipher cipher = Cipher.getInstance("RSA");
+		Cipher cipher = Cipher.getInstance(instance);
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 		byte[] keyBytes = secretKey.getEncoded();
 		byte[] encryptedKey = cipher.doFinal(keyBytes);
@@ -90,72 +130,97 @@ public class RSA {
 		return encryptKey;
 	}
 	
-	public void encryptFile(String srcFile, String destFile) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-		DataOutputStream dos1 = new DataOutputStream(new FileOutputStream(destFile));
-		dos1.writeUTF(encryptSercetKey());
-		dos1.flush();
-		
-		DataInputStream dis = new DataInputStream(new FileInputStream(srcFile));
-		Cipher c = Cipher.getInstance("AES");
-		c.init(Cipher.ENCRYPT_MODE, secretKey);
-		
-		CipherOutputStream cos = new CipherOutputStream(dos1, c);
-		DataOutputStream dos2 = new DataOutputStream(cos);
-		byte [] buffer = new byte[1024];
-		int bytesRead;
-		while((bytesRead = dis.read(buffer))!=-1) {
-			dos2.write(buffer, 0, bytesRead);
-		}
-		dis.close();		
-		dos2.close();
-		cos.close();
-		dos1.close();
-		
+	public void encryptFile(String srcFile, String destFile, String instance) throws Exception {
+	    FileOutputStream fos = new FileOutputStream(destFile);
+	    DataOutputStream dos = new DataOutputStream(fos);
+	    
+	    // Ghi key
+	    SecretKey secretKey = genSecretKey("AES", 1024);
+	    String encryptedKey = encryptSercetKey(secretKey, instance);
+	    byte[] encryptedKeyBytes = encryptedKey.getBytes(StandardCharsets.UTF_8);
+	    dos.writeInt(encryptedKeyBytes.length); // ghi độ dài key
+	    dos.write(encryptedKeyBytes); // ghi key
+	    
+	    // Ghi dữ liệu file đã mã hóa AES
+	    Cipher cipher = Cipher.getInstance("AES");
+	    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+	    CipherOutputStream cos = new CipherOutputStream(fos, cipher); // dùng lại fos, không dùng dos nữa
+	    
+	    FileInputStream fis = new FileInputStream(srcFile);
+	    byte[] buffer = new byte[1024];
+	    int bytesRead;
+	    while ((bytesRead = fis.read(buffer)) != -1) {
+	        cos.write(buffer, 0, bytesRead);
+	    }
+
+	    fis.close();
+	    cos.close(); // tự đóng fos
 	}
-	
-	
+
+	public void decryptFile(String srcFile, String destFile, String instance) throws Exception {
+	    FileInputStream fis = new FileInputStream(srcFile);
+	    DataInputStream dis = new DataInputStream(fis);
+
+	    // Đọc độ dài và key
+	    int keyLength = dis.readInt();
+	    byte[] encryptedKeyBytes = new byte[keyLength];
+	    dis.readFully(encryptedKeyBytes);
+	    String encryptedKey = new String(encryptedKeyBytes, StandardCharsets.UTF_8);
+
+	    SecretKey originalKey = decryptSercetKey(encryptedKey, instance);
+	    Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+	    cipher.init(Cipher.DECRYPT_MODE, originalKey);
+
+	    CipherInputStream cis = new CipherInputStream(fis, cipher);
+	    FileOutputStream fos = new FileOutputStream(destFile);
+	    byte[] buffer = new byte[1024];
+	    int bytesRead;
+	    while ((bytesRead = cis.read(buffer)) != -1) {
+	        fos.write(buffer, 0, bytesRead);
+	    }
+
+	    cis.close();
+	    fos.close();
+	}
+
+	private SecretKey decryptSercetKey(String encryptedKey, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		Cipher cipher = Cipher.getInstance(instance);
+		cipher.init(Cipher.DECRYPT_MODE, privateKey);
+		byte[] encryptedKeyBytes = Base64.getDecoder().decode(encryptedKey);
+		byte[] decryptedKeyBytes = cipher.doFinal(encryptedKeyBytes);
+		SecretKey originalKey = new SecretKeySpec(decryptedKeyBytes, "AES");
+		return originalKey;
+	}
+
 	public String getPublicKey() {
 	    return Base64.getEncoder().encodeToString(publicKey.getEncoded());
 	}
 	
-	
 	public String getPrivateKey() {
 	    return Base64.getEncoder().encodeToString(privateKey.getEncoded());
 	}
-	
-	public void setPublicKey(String base64PublicKey) {
-	    try {
+
+	public void setPublicKey(String base64PublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
 	        byte[] decodedKey = Base64.getDecoder().decode(base64PublicKey);
 	        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
 	        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 	        this.publicKey = keyFactory.generatePublic(keySpec);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+	   
 	}
-	
-	public void setPrivateKey(String base64PrivateKey) {
-	    try {
+
+	public void setPrivateKey(String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
 	        byte[] decodedKey = Base64.getDecoder().decode(base64PrivateKey);
 	        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
 	        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 	        this.privateKey = keyFactory.generatePrivate(keySpec);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+	}
+
+	public void clearPrivateKey() {
+	    this.privateKey = null;
 	}
 	
-	
-	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
-		Security.addProvider(new BouncyCastleProvider());
-		for (Provider provider : Security.getProviders()) {
-		    for (Provider.Service service : provider.getServices()) {
-		        if (service.getType().equals("Cipher") && service.getAlgorithm().contains("RSA")) {
-		            System.out.println("Cipher: " + service.getAlgorithm() + " - " + provider.getName());
-		        }
-		    }
-		}
-		
+	public void clearPublicKey() {
+		this.privateKey = null;
 	}
 
 }
