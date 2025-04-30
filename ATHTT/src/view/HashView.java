@@ -26,7 +26,7 @@ public class HashView {
 	private JLabel optionAlgorithms, inputTextLabel, outputTextLabel, inputFileLabel, outputFileLabel;
 	private JTextArea inputText, outputText, outputFile ;
 	private JTextField srcFilePath;
-	private JButton hashTextBtn, hashFileBtn;
+	private JButton hashTextBtn, hashFileBtn, clearTextBtn, clearFileBtn;
 	private JPanel algorithmPanel, textPanel, filePanel;
 	
 	public HashView() {
@@ -100,15 +100,18 @@ public class HashView {
         outputPanel.add(outputTextLabel, BorderLayout.NORTH);
         outputPanel.add(scrollOutput, BorderLayout.CENTER);
         
-        JPanel hashTextBtnPanel = new JPanel();
+        JPanel hashTextBtnPanel = new JPanel(new FlowLayout());
         hashTextBtn = new JButton("Hash chuỗi");
         hashTextBtnPanel.add(hashTextBtn);
+        clearTextBtn = new JButton("Clear");
+        hashTextBtnPanel.add(clearTextBtn);
         
         textPanel.add(inputPanel);
         textPanel.add(Box.createVerticalStrut(10));
         textPanel.add(outputPanel);
         textPanel.add(Box.createVerticalStrut(10)); 
         textPanel.add(hashTextBtnPanel);
+        
 	}	
 	
 	public void setHashFilePanel() {
@@ -148,6 +151,8 @@ public class HashView {
 	    JPanel fileBtnPanel = new JPanel();
 	    hashFileBtn = new JButton("Hash file");
 	    fileBtnPanel.add(hashFileBtn);
+	    clearFileBtn = new JButton("Clear");
+	    fileBtnPanel.add(clearFileBtn);
 
 	    // === Add to file panel ===
 	    filePanel.add(sourcePanel);
@@ -172,8 +177,8 @@ public class HashView {
 		return inputText.getText();
 	}
 
-	public void setInputText(JTextArea inputText) {
-		this.inputText = inputText;
+	public void setInputText(String input) {
+		this.inputText.setText(input);
 	}
 
 	public JTextArea getOutputText() {
@@ -193,21 +198,33 @@ public class HashView {
 	}
 
 	public String getSrcFilePath() {
-		return srcFilePath.getText();
+		return this.srcFilePath.getText();
+	}
+	
+	public void setSrcFilePath(String srcFilePath) {
+		this.srcFilePath.setText(srcFilePath);
 	}
 
 	public JButton getHashTextBtn() {
-		return hashTextBtn;
+		return this.hashTextBtn;
 	}
 
 	public JButton getHashFileBtn() {
-		return hashFileBtn;
+		return this.hashFileBtn;
+	}
+	
+	public JButton getClearTextBtn() {
+		return this.clearTextBtn;
+	}
+	
+	public JButton getClearFileBtn() {
+		return this.clearFileBtn;
 	}
 
 	public String getAlgorithms() {
-		return (String) algorithms.getSelectedItem();
+		return (String) this.algorithms.getSelectedItem();
 	}
-
+	
 	public void showDialogMessage(String message, String type) {
 		switch (type.toUpperCase()) {
 		case "ERROR":

@@ -29,6 +29,9 @@ public class HashController {
 					view.showDialogMessage("Thuật toán không được hỗ trợ: " + e1.getMessage(), "ERROR");
 				} catch (NoSuchProviderException e1) {
 					view.showDialogMessage("Thuật toán không được hỗ trợ: " + e1.getMessage(), "ERROR");
+				}catch (Exception e1) {
+					// Bắt tất cả lỗi còn lại, nếu có
+					view.showDialogMessage("Đã xảy ra lỗi không xác định: " + e1.getMessage(), "ERROR");
 				}
 			}
 		});
@@ -60,6 +63,34 @@ public class HashController {
 
 			}
 		});
+		
+		this.view.getClearTextBtn().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				clear("TEXT");
+				
+			}
+		});
+		
+		this.view.getClearFileBtn().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				clear("FILE");
+				
+			}
+		});
+	}
+	
+	private void clear(String panel) {
+		if(panel.equals("TEXT")) {
+			view.setInputText("");
+			view.setOutputText("");
+		} else {view.setOutputFile("");
+		view.setSrcFilePath("");
+		}
+		
 	}
 
 	public static void main(String[] args) {

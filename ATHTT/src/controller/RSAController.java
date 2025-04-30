@@ -2,6 +2,7 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -77,7 +78,12 @@ public class RSAController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				try {
+					handleFile("ENCRYPT");
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
 			}
 		});
@@ -86,10 +92,24 @@ public class RSAController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				try {
+					handleFile("DECRYPT");
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
 			}
 		});
+	}
+	
+	private void setKey() {
+		String privateKey = this.view.getPrivateKey();
+		String publicKey = this.view.getPublicKey();
+		if (!privateKey.isEmpty() && !publicKey.isEmpty()) {
+			this.model.setPublicKey(publicKey);
+			this.model.setPrivateKey(privateKey);
+		}
 	}
 
 	private void handleText(String mode) {
@@ -125,13 +145,28 @@ public class RSAController {
 		}
 	}
 
-	private void setKey() {
-		String privateKey = this.view.getPrivateKey();
-		String publicKey = this.view.getPublicKey();
-		if (!privateKey.isEmpty() && !publicKey.isEmpty()) {
-			this.model.setPublicKey(publicKey);
-			this.model.setPrivateKey(privateKey);
+	private void handleFile(String mode) throws Exception {
+		setKey();
+		String algorithm = this.view.getAlgorithm();
+		String srcFile = view.getSrcFile();
+		String destFile = view.getDestFile();
+		if(mode.equals("ENCRYPT")) {
+			model.genSecretKey("AES", 128);
+			try {
+				this.model.encryptFile(srcFile, destFile);
+			} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+					| BadPaddingException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {try {
+			this.model.decryptFile(srcFile, destFile);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+			}
 	}
 
 }
