@@ -16,10 +16,24 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class HashUtil {
 	
+	// add provider Bouncy Castle
 	public HashUtil() {
 		super();
 		Security.addProvider(new BouncyCastleProvider());
 	}
+	
+	/**
+	 * Hashes an input text string using the specified hashing algorithm (e.g., SHA-256, MD5).
+	 * 
+	 * This method attempts to create a MessageDigest instance using the given algorithm.
+	 * If it fails with the default provider, it will retry with the "BC" (Bouncy Castle) provider.
+	 * 
+	 * @param data The input text to be hashed
+	 * @param instance The name of the hashing algorithm (e.g., "SHA-256", "MD5")
+	 * @return The hash string in hexadecimal format
+	 * @throws NoSuchAlgorithmException If the algorithm is not supported by either the default or Bouncy Castle provider
+	 * @throws NoSuchProviderException If the "BC" provider is not available when needed
+	 */
 	
     public String hashText(String data, String instance) throws NoSuchAlgorithmException, NoSuchProviderException {
         MessageDigest md;
@@ -36,7 +50,21 @@ public class HashUtil {
                 
         return hashText;
     }
-	
+    
+    /**
+     * Computes the hash value of a file's content using the specified hashing algorithm.
+     * 
+     * This method attempts to create a MessageDigest instance using the given algorithm.
+     * If it fails with the default provider, it will retry with the "BC" (Bouncy Castle) provider.
+     * Then, it reads the file content through a stream and calculates the hash.
+     *
+     * @param srcFile The path to the file to be hashed
+     * @param instance The name of the hashing algorithm (e.g., "SHA-256", "MD5")
+     * @return The hash of the file as a hexadecimal string
+     * @throws NoSuchAlgorithmException If the algorithm is not supported by either the default or Bouncy Castle provider
+     * @throws NoSuchProviderException If the "BC" provider is not available when needed
+     * @throws IOException If an error occurs while reading the file
+     */
 	public String hashFile(String srcFile, String instance) throws NoSuchAlgorithmException, NoSuchProviderException, IOException{
 		 MessageDigest md;
 	        try {
@@ -45,7 +73,8 @@ public class HashUtil {
 	            // Thử với BouncyCastle
 	            md = MessageDigest.getInstance(instance, "BC");
 	        }
-	        
+	    
+	    // read file
 	    InputStream is = new BufferedInputStream(new FileInputStream(srcFile));
 	    DigestInputStream dis = new DigestInputStream(is, md);
 	    byte[] buffer = new byte[1024];

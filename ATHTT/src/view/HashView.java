@@ -45,7 +45,9 @@ public class HashView {
 		this.frame.setVisible(true);
 	}
 	
+	// create algorithmPanel
 	public void setAlgorithmPanel() {
+		// hash algorithms are supported by java and bouncy castle
 		String[] hashAlgorithms = {
 			    "BLAKE2B-160", "BLAKE2B-256", "BLAKE2B-384", "BLAKE2B-512",
 			    "BLAKE2S-128", "BLAKE2S-160", "BLAKE2S-224", "BLAKE2S-256",
@@ -65,6 +67,8 @@ public class HashView {
 			    "TIGER",
 			    "WHIRLPOOL"
 			};
+		
+		// create combox that allows user to choose hash algorithm
 		algorithms = new JComboBox<>(hashAlgorithms);
 		algorithms.setSelectedIndex(0);
 		optionAlgorithms = new JLabel("Thuật toán hash:");
@@ -73,6 +77,7 @@ public class HashView {
 		algorithmPanel.add(algorithms);
 	}
 	
+	// create hash text panel
 	public void setHashTextPanel() {
 		textPanel = new JPanel();
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
@@ -100,12 +105,14 @@ public class HashView {
         outputPanel.add(outputTextLabel, BorderLayout.NORTH);
         outputPanel.add(scrollOutput, BorderLayout.CENTER);
         
+        // Button Panel
         JPanel hashTextBtnPanel = new JPanel(new FlowLayout());
         hashTextBtn = new JButton("Hash chuỗi");
         hashTextBtnPanel.add(hashTextBtn);
         clearTextBtn = new JButton("Clear");
         hashTextBtnPanel.add(clearTextBtn);
         
+        // add inputPanel, outputPanel and hashTextBtnPanel
         textPanel.add(inputPanel);
         textPanel.add(Box.createVerticalStrut(10));
         textPanel.add(outputPanel);
@@ -114,12 +121,13 @@ public class HashView {
         
 	}	
 	
+	// create hash filePanel
 	public void setHashFilePanel() {
 	    filePanel = new JPanel();
 	    filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.Y_AXIS));
 	    filePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-	    // === Source file panel ===
+	    // Source file panel 
 	    inputFileLabel = new JLabel("Đường dẫn file nguồn:",SwingConstants.LEFT);
 	    srcFilePath = new JTextField();
 	    JButton browseSourceBtn = new JButton("...");
@@ -134,7 +142,7 @@ public class HashView {
 	    sourcePanel.add(Box.createVerticalStrut(5));
 	    sourcePanel.add(sourceInputPanel, BorderLayout.CENTER);
 
-	    // === Output file panel ===
+	    // output file panel 
 	    outputFileLabel = new JLabel("Kết quả hash file:", SwingConstants.LEFT);
 	    outputFile = new JTextArea(4, 50);
 	    outputFile.setLineWrap(true);
@@ -225,6 +233,7 @@ public class HashView {
 		return (String) this.algorithms.getSelectedItem();
 	}
 	
+	// display dialoag 
 	public void showDialogMessage(String message, String type) {
 		switch (type.toUpperCase()) {
 		case "ERROR":

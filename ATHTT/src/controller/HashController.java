@@ -21,11 +21,17 @@ public class HashController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String instance = view.getAlgorithms();
+				
 				try {
-					String output = model.hashText(view.getInputText(), instance);
-					view.setOutputText(output);
-				} catch (NoSuchAlgorithmException e1) {
+					// Get the selected hashing algorithm from the user interface (e.g., "SHA-256", "MD5", etc.)
+					String instance = view.getAlgorithms();
+				    // Call the model's method to hash the input text using the selected algorithm
+				    String output = model.hashText(view.getInputText(), instance);				    
+				    // Display the hashed result in the output text area on the UI
+				    view.setOutputText(output);
+				} 
+				// Handle exception
+				catch (NoSuchAlgorithmException e1) {
 					view.showDialogMessage("Thuật toán không được hỗ trợ: " + e1.getMessage(), "ERROR");
 				} catch (NoSuchProviderException e1) {
 					view.showDialogMessage("Thuật toán không được hỗ trợ: " + e1.getMessage(), "ERROR");
@@ -33,7 +39,7 @@ public class HashController {
 					// Bắt tất cả lỗi còn lại, nếu có
 					view.showDialogMessage("Đã xảy ra lỗi không xác định: " + e1.getMessage(), "ERROR");
 				}
-			}
+			} 
 		});
 
 		this.view.getHashFileBtn().addActionListener(new ActionListener() {
@@ -42,15 +48,22 @@ public class HashController {
 			public void actionPerformed(ActionEvent e) {
 
 				try {
+					// Get the selected hashing algorithm and source file path from the UI
 					String instance = view.getAlgorithms();
 					String srcFile = view.getSrcFilePath();
+
+					// Check if a file is selected for hashing
 					if (!srcFile.isEmpty()) {
-						String output = model.hashFile(srcFile, instance);
-						view.setOutputFile(output);
+					    // Call model to hash the file and display the output
+					    String output = model.hashFile(srcFile, instance);
+					    view.setOutputFile(output);
 					} else {
-						view.showDialogMessage("Vui lòng chọn file trước khi hash.", "WARNING");
+					    // Prompt the user to select a file before hashing
+					    view.showDialogMessage("Vui lòng chọn file để hash.", "WARNING");
 					}
-				} catch (NoSuchAlgorithmException e1) {
+				} 
+				// Handle exception
+				  catch (NoSuchAlgorithmException e1) {
 					view.showDialogMessage("Thuật toán không hợp lệ: " + e1.getMessage(), "ERROR");
 				} catch (NoSuchProviderException e1) {
 					view.showDialogMessage("Không tìm thấy provider phù hợp: " + e1.getMessage(), "ERROR");
@@ -83,6 +96,14 @@ public class HashController {
 		});
 	}
 	
+	/**
+	 * Clears the content on the user interface based on the specified panel type.
+	 * 
+	 * If the panel is "TEXT", the method clears both the input and output text fields.
+	 * If the panel is any other value, it clears the source file path and the output file path.
+	 *
+	 * @param panel The type of panel to clear ("TEXT" to clear text content, other values to clear file paths)
+	 */
 	private void clear(String panel) {
 		if(panel.equals("TEXT")) {
 			view.setInputText("");
