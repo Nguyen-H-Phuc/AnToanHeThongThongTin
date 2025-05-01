@@ -3,10 +3,7 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FileDialog;
-import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -26,7 +23,7 @@ public abstract class ClassicalCipherView {
 	private JLabel labelInput, labelOutput;
 	private JTextArea inputText, outputText;
 	private JTextField srcFile, destFile;
-	private JButton encryptTextBtn, decryptTextBtn, saveResultBtn, clearTextPanelBtn, swapBtn,  encryptFileBtn, decryptFileBtn, genKey, loadKey, saveKey;
+	private JButton encryptTextBtn, decryptTextBtn, saveResultBtn, clearTextPanelBtn, swapBtn,  encryptFileBtn, decryptFileBtn, genKey, loadKey, saveKey, browseSrcBtn, browseDestBtn;
 	private JPanel textPanel, filePanel;
 	
 	public void createFrame(int height, int width, String title) {
@@ -92,15 +89,15 @@ public abstract class ClassicalCipherView {
         JLabel labelSource = new JLabel("Đường dẫn file nguồn:");
         JPanel sourcePanel = new JPanel(new BorderLayout());
         srcFile = new JTextField();
-        JButton browseSourceBtn = new JButton("...");
+        browseSrcBtn = new JButton("...");
         sourcePanel.add(srcFile, BorderLayout.CENTER);
-        sourcePanel.add(browseSourceBtn, BorderLayout.EAST);
+        sourcePanel.add(browseSrcBtn, BorderLayout.EAST);
 
         // === Dest file panel with button ===
         JLabel labelDest = new JLabel("Đường dẫn file đích:");
         JPanel destPanel = new JPanel(new BorderLayout());
         destFile = new JTextField();
-        JButton browseDestBtn = new JButton("...");
+        browseDestBtn = new JButton("...");
         destPanel.add(destFile, BorderLayout.CENTER);
         destPanel.add(browseDestBtn, BorderLayout.EAST);
 
@@ -120,28 +117,6 @@ public abstract class ClassicalCipherView {
 
         // === Add file panel to frame ===
         frame.add(filePanel, BorderLayout.SOUTH);
-
-        // ===== Action for browse buttons =====
-        browseSourceBtn.addActionListener(e -> {
-            FileDialog fileDialog = new FileDialog((Frame) null, "Chọn file nguồn", FileDialog.LOAD);
-            fileDialog.setVisible(true);
-            if (fileDialog.getFile() != null) {
-                String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
-                srcFile.setText(selectedFile);
-            }
-        });
-
-
-        browseDestBtn.addActionListener(e -> {
-        	FileDialog fileDialog = new FileDialog((Frame) null, "Chọn file đích", FileDialog.LOAD);
-            fileDialog.setVisible(true);
-            if (fileDialog.getFile() != null) {
-                String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
-                destFile.setText(selectedFile);
-            }
-        });
-        setSwapBtn();
-        
 	}
 	
 	public void setSwapBtn() {
@@ -263,6 +238,14 @@ public abstract class ClassicalCipherView {
 		return swapBtn;
 	}
 
+	public JButton getBrowseSrcBtn() {
+		return browseSrcBtn;
+	}
+
+	public JButton getBrowseDestBtn() {
+		return browseDestBtn;
+	}
+
 	public void setGenKey(String keyName) {
 		this.genKey = new JButton(keyName);
 	}
@@ -290,4 +273,14 @@ public abstract class ClassicalCipherView {
 	public JTextArea getOutputTextArea() {
 		return this.outputText;
 	}
+
+	public JTextField getSrcFileTextField() {
+		return this.srcFile;
+	}
+
+	public JTextField getDestFileTextField() {
+		return this.destFile;
+	}
+	
+	
 }
