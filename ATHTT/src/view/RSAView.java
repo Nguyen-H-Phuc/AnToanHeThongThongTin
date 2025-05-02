@@ -71,7 +71,7 @@ public class RSAView extends ClassicalCipherView {
 		publicKeyLabel = new JLabel("Khoá công khai (Base64):");
 		publicKey = new JTextField();
 		
-		privateKeyLabel = new JLabel("Khoá công khai (Base64):");
+		privateKeyLabel = new JLabel("Khoá riêng tư (Base64):");
 		privateKey = new JTextField();
 		
 		JPanel optionKeyPanel = new JPanel(new GridLayout(2,2,5,10));

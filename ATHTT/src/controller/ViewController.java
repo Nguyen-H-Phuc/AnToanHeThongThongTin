@@ -2,10 +2,12 @@ package controller;
 
 import javax.swing.JOptionPane;
 
+import model.classicialcipher.AffineCipher;
 import model.classicialcipher.PermutationCipher;
 import model.classicialcipher.ShiftCipher;
 import model.classicialcipher.SubstitutionCipher;
 import model.classicialcipher.VigenereCipher;
+import view.AffineCipherView;
 import view.PermutationCipherView;
 import view.ShiftCipherView;
 import view.SubstitutionCipherView;
@@ -23,15 +25,20 @@ public class ViewController {
 	private void initController() {
 		view.getSubstitutionCipherBtn().addActionListener(e ->  openSubstitutionView());
 		view.getShiftCipherBtn().addActionListener(e -> openShiftCipherView());
-		view.getVigenereCipherBtin().addActionListener(e -> openShiftCipherView());
+		view.getVigenereCipherBtn().addActionListener(e -> openVigenereCipherView());
+		view.getPermutationCipher().addActionListener(e ->openPermuationCipherView());
+		view.getAffineCipherBtn().addActionListener(e ->openAffineCipherView());
+		view.getHillCipherBtn().addActionListener(e-> showNotImplemented());
 		
-		view.getAsymmetricEncryptionBtn().addActionListener(e -> openRSAView());
+		view.getSymmetricCipherBtn().addActionListener(e ->showNotImplemented());
+		view.getAsymmetricCipherBtn().addActionListener(e -> openRSAView());
 		view.getHashBtn().addActionListener(e -> openHashView());
 	}
 
 	private void openSubstitutionView() {
-		SubstitutionCipherView subView = new SubstitutionCipherView();
+		
 		SubstitutionCipher subModel = new SubstitutionCipher();
+		SubstitutionCipherView subView = new SubstitutionCipherView(subModel.getVietnameseAlphabet().length(), subModel.getVietnameseAlphabet());
 		new SubstitutionCipherController(subView, subModel);
 	}
 	
@@ -47,6 +54,10 @@ public class ViewController {
 		new VigenereCipherController(vigenereCipher, vigenereView);
 	}
 	
+	private void openAffineCipherView() {
+		AffineCipherController acc = new AffineCipherController(new AffineCipher(), new AffineCipherView());
+	}
+	
 	private void openPermuationCipherView() {
 		PermutationCipherView permuationView = new PermutationCipherView();
 		PermutationCipher perCipher = new PermutationCipher();
@@ -60,6 +71,7 @@ public class ViewController {
 	private void openHashView() {
 		HashController hashController = new HashController();
 	}
+	
 
 	private void showNotImplemented() {
 		JOptionPane.showMessageDialog(null, "Tính năng này chưa được triển khai.");

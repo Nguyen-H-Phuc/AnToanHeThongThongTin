@@ -135,7 +135,7 @@ public class RSA {
 	    DataOutputStream dos = new DataOutputStream(fos);
 	    
 	    // Ghi key
-	    SecretKey secretKey = genSecretKey("AES", 1024);
+	    SecretKey secretKey = genSecretKey("AES", 128);
 	    String encryptedKey = encryptSercetKey(secretKey, instance);
 	    byte[] encryptedKeyBytes = encryptedKey.getBytes(StandardCharsets.UTF_8);
 	    dos.writeInt(encryptedKeyBytes.length); // ghi độ dài key
@@ -200,7 +200,7 @@ public class RSA {
 	    return Base64.getEncoder().encodeToString(privateKey.getEncoded());
 	}
 
-	public void setPublicKey(String base64PublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void setPublicKey(String base64PublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException, IllegalArgumentException {
 	        byte[] decodedKey = Base64.getDecoder().decode(base64PublicKey);
 	        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
 	        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -208,7 +208,7 @@ public class RSA {
 	   
 	}
 
-	public void setPrivateKey(String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void setPrivateKey(String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, IllegalArgumentException {
 	        byte[] decodedKey = Base64.getDecoder().decode(base64PrivateKey);
 	        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
 	        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -220,7 +220,7 @@ public class RSA {
 	}
 	
 	public void clearPublicKey() {
-		this.privateKey = null;
+		this.publicKey = null;
 	}
 
 }

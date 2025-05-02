@@ -13,8 +13,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import model.RSA;
+import utils.ViewUtils;
 import view.RSAView;
-import view.ViewUtils;
 
 public class RSAController {
 	private RSA model;
@@ -110,11 +110,16 @@ public class RSAController {
 			}
 		});
 		ViewUtils.setupClearButton(view.getClearTextPanelBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setupSwapButton(view.getSwapBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setSaveResultBtn(view.getSaveResultBtn(), view.getOutputTextArea(), view.getFrame());
+		ViewUtils.setFilePath(view.getFrame(), view.getBrowseSrcBtn(), view.getSrcFileTextField());
+		ViewUtils.setFilePath(view.getFrame(), view.getBrowseDestBtn(), view.getDestFileTextField());
 	}
 	
 	private void setPublicKey() {
 	    String publicKey = this.view.getPublicKey();
-	    if (!publicKey.isEmpty()) {
+	    this.model.clearPublicKey();
+	    if (!publicKey.trim().isEmpty()) {
 	        try {
 	            this.model.setPublicKey(publicKey);
 	        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -228,7 +233,7 @@ public class RSAController {
 		}else {
 			String filePath = view.showFileDialog("Chọn file chứa khoá riêng tư", true);
 			try {
-				model.savePublicKey(view.getPublicKey(), filePath);
+				model.savePrivateKey(view.getPrivateKey(), filePath);
 			} catch (IOException e) {
 				view.showDialogMessage("Lỗi đọc file" + e.getMessage(), "ERROR");
 			}
@@ -245,22 +250,22 @@ public class RSAController {
 				} catch (NoSuchAlgorithmException e) {
 					this.view.showDialogMessage("Khoá không được hỗ trợ.", "ERROR");
 					e.printStackTrace();
-				} catch (InvalidKeySpecException e) {
+				} catch (InvalidKeySpecException| IllegalArgumentException e) {
 					this.view.showDialogMessage("Khoá bị lỗi.", "ERROR");
 				} catch (IOException e) {
 					this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");
 				}
 			}
 		} else {
-			String filePath = this.view.showFileDialog("Chọn file để tải khoá công khai", false);
+			String filePath = this.view.showFileDialog("Chọn file để tải khoá riêng tư", false);
 			if (!filePath.isEmpty()) {
 				try {
 					this.model.loadPrivateKey(filePath);
-					this.view.setPublicKey(this.model.getPrivateKey());
+					this.view.setPrivateKey(this.model.getPrivateKey());
 				} catch (NoSuchAlgorithmException e) {
 					this.view.showDialogMessage("Khoá không được hỗ trợ.", "ERROR");
 					e.printStackTrace();
-				} catch (InvalidKeySpecException e) {
+				} catch (InvalidKeySpecException | IllegalArgumentException e) {
 					this.view.showDialogMessage("Khoá bị lỗi.", "ERROR");
 				} catch (IOException e) {
 					this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");

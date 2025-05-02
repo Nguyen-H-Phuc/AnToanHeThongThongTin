@@ -3,8 +3,8 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 
-public class View extends JFrame {
-	private JButton substitutionCipherBtn, shiftCipherBtn, vigenereCipherBtin, permutationCipher, symmetricEncryptionBtn, asymmetricEncryptionBtn, hashBtn;
+public class View  {
+	private JButton substitutionCipherBtn, shiftCipherBtn, vigenereCipherBtn, permutationCipherBtn, hillCipherBtn, affineCipherBtn, symmetricCipherBtn, asymmetricCipherBtn, hashBtn;
 	private JFrame mainFrame;
 	private JPanel mainPanel;
 
@@ -14,28 +14,32 @@ public class View extends JFrame {
 	
 	private void init() {
 		mainFrame = new JFrame("Cipher Tool");
-		mainFrame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		mainFrame.setSize(600, 500);
+		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainFrame.setSize(500, 300);
 		
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new FlowLayout());
 		
 		substitutionCipherBtn = new JButton("Mã hoá thay thế");
 		shiftCipherBtn = new JButton("Mã hoá dịch chuyển");
-		vigenereCipherBtin = new JButton("Mã hoá vigenere");
-		permutationCipher = new JButton("Mã hoá hoán vị");
+		vigenereCipherBtn = new JButton("Mã hoá vigenere");
+		permutationCipherBtn = new JButton("Mã hoá hoán vị");
+		affineCipherBtn = new JButton("Mã hoá Affine");
+		hillCipherBtn = new JButton("Mã hoá hill");
 		
-		symmetricEncryptionBtn = new JButton("Mã hoá đối xứng");
-		asymmetricEncryptionBtn = new JButton("Mã hoá bất đối xứng");
+		symmetricCipherBtn = new JButton("Mã hoá đối xứng");
+		asymmetricCipherBtn = new JButton("Mã hoá bất đối xứng");
 		hashBtn = new JButton("Hash");
 		
 		mainPanel.add(substitutionCipherBtn);
 		mainPanel.add(shiftCipherBtn);
-		mainPanel.add(vigenereCipherBtin);
-		mainPanel.add(permutationCipher);
+		mainPanel.add(vigenereCipherBtn);
+		mainPanel.add(permutationCipherBtn);
+		mainPanel.add(affineCipherBtn);
+		mainPanel.add(hillCipherBtn);
 		
-		mainPanel.add(symmetricEncryptionBtn);
-		mainPanel.add(asymmetricEncryptionBtn);
+		mainPanel.add(symmetricCipherBtn);
+		mainPanel.add(asymmetricCipherBtn);
 		mainPanel.add(hashBtn);
 		
 		mainFrame.add(mainPanel);
@@ -51,16 +55,28 @@ public class View extends JFrame {
 		return shiftCipherBtn;
 	}
 
-	public JButton getVigenereCipherBtin() {
-		return vigenereCipherBtin;
+	public JButton getVigenereCipherBtn() {
+		return vigenereCipherBtn;
 	}
 
 	public JButton getPermutationCipher() {
-		return permutationCipher;
+		return permutationCipherBtn;
 	}
 	
-	public JButton getAsymmetricEncryptionBtn() {
-		return asymmetricEncryptionBtn;
+	public JButton getHillCipherBtn() {
+		return hillCipherBtn;
+	}
+
+	public JButton getAffineCipherBtn() {
+		return affineCipherBtn;
+	}
+
+	public JButton getSymmetricCipherBtn(){
+		return this.symmetricCipherBtn;
+	}
+	
+	public JButton getAsymmetricCipherBtn() {
+		return asymmetricCipherBtn;
 	}
 	
 	public JButton getHashBtn() {
