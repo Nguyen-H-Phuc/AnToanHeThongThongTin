@@ -23,13 +23,13 @@ public class VigenereCipherView extends ClassicalCipherView {
 	public VigenereCipherView() {
 		super();
 		createFrame(700, 600, "Vigenere cipher tool");
-		createPanelTextCipher();
-		createFileCipherPanel();
+		
 		createKeyPanel();
+		createPanelTextCipher();
+		
 		this.getFrame().setLayout(new BorderLayout(10, 10));
-		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
-		this.getFrame().add(this.getFilePanel(), BorderLayout.SOUTH);
 		this.getFrame().add(keyPanel, BorderLayout.NORTH);
+		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
 		this.getFrame().setVisible(true);
 	}
 
@@ -49,12 +49,16 @@ public class VigenereCipherView extends ClassicalCipherView {
 		tf.setFormatterFactory(new DefaultFormatterFactory(formatter));
 		
 		key = new JTextField();
+		key.setPreferredSize(new Dimension(200, 25));
+		
 		this.setGenKey("Tạo khoá");
 		this.setSaveKey("Lưu khoá");
-		this.setSaveKey("Tải khoá");
+		this.setLoadKey("Tải khoá");
+		
 		keyPanel = new JPanel(new GridLayout(2,1));
 		JPanel optionKeyPanel = new JPanel(new FlowLayout());
-		key.setPreferredSize(new Dimension(200, 25));
+		
+		
 		JLabel labelKey = new JLabel("Khoá");
 		JLabel keyLengthLabel = new JLabel("Chiều dài khoá");
 		optionKeyPanel.add(keyLengthLabel);
@@ -63,9 +67,9 @@ public class VigenereCipherView extends ClassicalCipherView {
 		optionKeyPanel.add(key);
 		
 		JPanel keyBtnPanel = new JPanel(new FlowLayout());
-		keyPanel.add(this.getGenKey());
-		keyPanel.add(this.getLoadKey());
-		keyPanel.add(this.getSaveKey());
+		keyBtnPanel.add(this.getGenKey());
+		keyBtnPanel.add(this.getLoadKey());
+		keyBtnPanel.add(this.getSaveKey());
 		keyPanel.add(optionKeyPanel);
 		keyPanel.add(keyBtnPanel);
 	}
@@ -86,7 +90,4 @@ public class VigenereCipherView extends ClassicalCipherView {
 		this.key.setText(key);
 	}
 
-	public static void main(String[] args) {
-		new VigenereCipherView();
-	}
 }

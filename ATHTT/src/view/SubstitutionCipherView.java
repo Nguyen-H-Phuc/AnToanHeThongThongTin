@@ -2,222 +2,127 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FileDialog;
-import java.awt.Frame;
-import java.awt.GridLayout;
+import java.awt.FlowLayout;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
-public class SubstitutionCipherView {
-	private JFrame frame;
-	private JPanel keyPanel, textPanel, filePanel, btnTextPanel, btnFilePanel;
-	private JButton encryptTextBtn, decryptTextBtn, encryptFileBtn, decryptFileBtn, createKey, saveKey, loadKey, saveResultBtn;
-	private JTextArea inputText, outputText;
-	private JTextField sourceFilePath, destFilePath;
-	private JLabel labelInputText, labelOutPutText, labelSourceFile, labelDestFile;
+
+public class SubstitutionCipherView extends ClassicalCipherView {
+	private JPanel keyPanel;
+	private JTable keyTable;
+	private DefaultTableModel tableModel;
 	
-	public SubstitutionCipherView() {
-		init();
+	public SubstitutionCipherView(int row,String charset) {
+		super();
+		createFrame(400, 600, "Shift cipher tool");
+		createKeyPanel(row, charset);
+		createPanelTextCipher();
+		
+		this.getFrame().setLayout(new BorderLayout(10, 10));
+		this.getFrame().add(keyPanel, BorderLayout.NORTH);
+		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
+		this.getFrame().setVisible(true);
 	}
 
-    private void init() {
-        frame = new JFrame("Substitution Cipher Tool");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(700, 600);
-        frame.setLayout(new BorderLayout(10, 10));
+	public void createKeyPanel(int row, String charset) {
+		JPanel optionKey = new JPanel(new FlowLayout());
+		this.setGenKey("Tạo khoá");
+		this.setSaveKey("Lưu khoá");
+		this.setLoadKey("Tải khoá");
+		optionKey.add(this.getGenKey());
+		optionKey.add(this.getLoadKey());
+		optionKey.add(this.getSaveKey());
+		
+		JPanel tablePanel = new JPanel(new FlowLayout());
+		JScrollPane scroll = createTabel(row, charset);
+		scroll.setPreferredSize(new Dimension(300, 200));
+		tablePanel.add(scroll);
+		
+		JPanel northPanel = new JPanel();
+		
+		keyPanel = new JPanel(new BorderLayout());
+		
+		keyPanel.add(northPanel, BorderLayout.NORTH);
+		keyPanel.add(tablePanel, BorderLayout.CENTER);
+		keyPanel.add(optionKey, BorderLayout.SOUTH);
 
-        // ===== NORTH: Key Panel =====
-        JPanel keyPanel = new JPanel();
-        createKey = new JButton("Tạo khóa");
-        loadKey = new JButton("Tải khóa");
-        saveKey = new JButton("Lưu khóa");
-        keyPanel.add(createKey);
-        keyPanel.add(loadKey);
-        keyPanel.add(saveKey);
-        frame.add(keyPanel, BorderLayout.NORTH);
-
-        // ===== CENTER: Text Panel =====
-        JPanel textPanel = new JPanel();
-        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
-        textPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Input Panel
-        JPanel inputPanel = new JPanel(new BorderLayout());
-        JLabel labelInput = new JLabel("Nhập văn bản", SwingConstants.LEFT);
-        inputText = new JTextArea(8, 50);
-        inputText.setLineWrap(true);
-        inputText.setWrapStyleWord(true);
-        JScrollPane scrollInput = new JScrollPane(inputText);
-        scrollInput.setPreferredSize(new Dimension(600, 100));
-        inputPanel.add(labelInput, BorderLayout.NORTH);
-        inputPanel.add(scrollInput, BorderLayout.CENTER);
-
-        // Output Panel
-        JPanel outputPanel = new JPanel(new BorderLayout());
-        JLabel labelOutput = new JLabel("Kết quả", SwingConstants.LEFT);
-        outputText = new JTextArea(8, 50);
-        outputText.setLineWrap(true);
-        outputText.setWrapStyleWord(true);
-        JScrollPane scrollOutput = new JScrollPane(outputText);
-        scrollOutput.setPreferredSize(new Dimension(600, 100));
-        outputPanel.add(labelOutput, BorderLayout.NORTH);
-        outputPanel.add(scrollOutput, BorderLayout.CENTER);
-
-        // Text Buttons
-        JPanel textBtnPanel = new JPanel();
-        encryptTextBtn = new JButton("Mã hóa văn bản");
-        decryptTextBtn = new JButton("Giải mã văn bản");
-        saveResultBtn = new JButton("Lưu kết quả");
-        textBtnPanel.add(encryptTextBtn);
-        textBtnPanel.add(decryptTextBtn);
-        textBtnPanel.add(saveResultBtn);
-
-        textPanel.add(inputPanel);
-        textPanel.add(Box.createVerticalStrut(10));
-        textPanel.add(outputPanel);
-        textPanel.add(Box.createVerticalStrut(10));
-        textPanel.add(textBtnPanel);
-
-        frame.add(textPanel, BorderLayout.CENTER);
-
-     // ===== SOUTH: File Panel =====
-        JPanel filePanel = new JPanel();
-        filePanel.setLayout(new GridLayout(5, 1, 5, 5));
-        filePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // === Source file panel with button ===
-        JLabel labelSource = new JLabel("Đường dẫn file nguồn:");
-        JPanel sourcePanel = new JPanel(new BorderLayout());
-        sourceFilePath = new JTextField();
-        JButton browseSourceBtn = new JButton("...");
-        sourcePanel.add(sourceFilePath, BorderLayout.CENTER);
-        sourcePanel.add(browseSourceBtn, BorderLayout.EAST);
-
-        // === Dest file panel with button ===
-        JLabel labelDest = new JLabel("Đường dẫn file đích:");
-        JPanel destPanel = new JPanel(new BorderLayout());
-        destFilePath = new JTextField();
-        JButton browseDestBtn = new JButton("...");
-        destPanel.add(destFilePath, BorderLayout.CENTER);
-        destPanel.add(browseDestBtn, BorderLayout.EAST);
-
-        // === Button panel ===
-        JPanel fileBtnPanel = new JPanel();
-        encryptFileBtn = new JButton("Mã hóa file");
-        decryptFileBtn = new JButton("Giải mã file");
-        fileBtnPanel.add(encryptFileBtn);
-        fileBtnPanel.add(decryptFileBtn);
-
-        // === Add to file panel ===
-        filePanel.add(labelSource);
-        filePanel.add(sourcePanel);
-        filePanel.add(labelDest);
-        filePanel.add(destPanel);
-        filePanel.add(fileBtnPanel);
-
-        // === Add file panel to frame ===
-        frame.add(filePanel, BorderLayout.SOUTH);
-
-        // ===== Action for browse buttons =====
-        browseSourceBtn.addActionListener(e -> {
-            FileDialog fileDialog = new FileDialog((Frame) null, "Chọn file nguồn", FileDialog.LOAD);
-            fileDialog.setVisible(true);
-            if (fileDialog.getFile() != null) {
-                String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
-                sourceFilePath.setText(selectedFile);
-            }
-        });
-
-
-        browseDestBtn.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            int result = fileChooser.showSaveDialog(frame);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                destFilePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
-            }
-        });
-
-
-        // ===== Hiển thị giao diện =====
-        frame.setLocationRelativeTo(null); // hiện giữa màn hình
-        frame.setVisible(true);
-    }
-    
-    public void showWarningDialog(String message) {
-    	JOptionPane.showMessageDialog(null, message, "Thông báo", JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void showErrorDiaglog(String message) {
-    	JOptionPane.showMessageDialog(null, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
-    }
-    
-    public String showFileChooser() {
-        JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showSaveDialog(frame);
-        if (result == JFileChooser.APPROVE_OPTION) {
-        	return fileChooser.getSelectedFile().getAbsolutePath();
-        }
-        return "";
-    }
-	
-	public JButton getCreateKey() {
-		return createKey;
-	}
-
-	public JButton getSaveKey() {
-		return saveKey;
-	}
-
-	public JButton getLoadKey() {
-		return loadKey;
-	}
-
-	public JButton getEncryptTextBtn() {
-		return encryptTextBtn;
-	}
-
-	public JButton getDecryptTextBtn() {
-		return decryptTextBtn;
 	}
 	
-	public JButton getSaveResultBtn() {
-		return saveResultBtn;
+	private JScrollPane createTabel(int row, String charset) {
+	    String[] columnNames = {"Kí tự gốc", "Kí tự thay thế"};
+	    Object[][] data = new Object[row][2];
+
+	    for (int i = 0; i < row; i++) {
+	        data[i][0] = charset.charAt(i);
+	        data[i][1] = "";     // value để trống
+	    }
+
+	    tableModel = new DefaultTableModel(data, columnNames) {
+	        @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return column == 1;  // chỉ cột "Value" cho phép chỉnh sửa
+	        }
+	    };
+
+	    keyTable = new JTable(tableModel);
+	    JScrollPane scrollPane = new JScrollPane(keyTable);
+	    return scrollPane;
+	}
+	
+	public void updateTableValues(Map<Character, Character> newValues) {
+	    int rowCount = tableModel.getRowCount();
+
+	    for (int i = 0; i < rowCount; i++) {
+	        Object col0Value = tableModel.getValueAt(i, 0);
+
+	        if (col0Value instanceof Character && newValues != null && newValues.containsKey((Character) col0Value)) {
+	            Character newValue = newValues.get((Character) col0Value);
+	            tableModel.setValueAt(newValue, i, 1);  // cập nhật cột 1 bằng value từ hashmap
+	        } else {
+	            tableModel.setValueAt("", i, 1);  // để trống nếu không có trong hashmap
+	        }
+	    }
 	}
 
-	public JTextArea getInputText() {
-		return inputText;
+	public Map<Character, Character> getTableValues() {
+	    if (keyTable.isEditing()) {
+	    	keyTable.getCellEditor().stopCellEditing();
+	    }
+
+	    int rowCount = tableModel.getRowCount();
+	    Map<Character, Character> resultMap = new HashMap<>();
+
+	    for (int i = 0; i < rowCount; i++) {
+	        Object keyObj = tableModel.getValueAt(i, 0);  // cột 0
+	        Object valueObj = tableModel.getValueAt(i, 1);  // cột 1
+
+	        System.out.println("Row " + i + ": keyObj=" + keyObj + ", valueObj=" + valueObj);
+
+	        if (keyObj != null && valueObj != null) {
+	            String keyStr = keyObj.toString().trim();
+	            String valueStr = valueObj.toString().trim();
+
+	            if (keyStr.length() == 1 && valueStr.length() == 1) {
+	                Character key = keyStr.charAt(0);
+	                Character value = valueStr.charAt(0);
+	                resultMap.put(key, value);
+	            }
+	        }
+	    }
+
+	    return resultMap;
 	}
 
-	public void setInputText(JTextArea inputText) {
-		this.inputText = inputText;
+	@Override
+	public void createKeyPanel() {
+		// TODO Auto-generated method stub
+		
 	}
-
-	public JTextArea getOutputText() {
-		return outputText;
-	}
-
-	public void setOutputText(JTextArea outputText) {
-		this.outputText = outputText;
-	}
-
-	public static void main(String[] args) {		
-		new SubstitutionCipherView();
-    }
-
+	
 	}
 

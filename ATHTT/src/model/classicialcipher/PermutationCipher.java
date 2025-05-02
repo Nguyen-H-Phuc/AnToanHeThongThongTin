@@ -1,20 +1,19 @@
 package model.classicialcipher;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
 public class PermutationCipher extends ClasscialCipher {
-	int [] permutationTable;
-	String tempFilePath;
+	private int [] permutationTable;
+	
 	
 	
 	public int[] genKey(int keyLength) {
-		permutationTable = new int[keyLength];
+		int []permutationTable = new int[keyLength];
 		Random random = new Random();
 		int i = 0;
 		while (i < keyLength) {
@@ -32,7 +31,7 @@ public class PermutationCipher extends ClasscialCipher {
 		return permutationTable;
 	}
 	
-	public String loadKey(String filePath) {
+	public String loadKey(String filePath) throws FileNotFoundException, IOException, NumberFormatException {
 	    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 	        String line = reader.readLine();
 	        if (line != null) {
@@ -43,26 +42,21 @@ public class PermutationCipher extends ClasscialCipher {
 	            }
 	            return "Load key thành công";
 	        } else {
-	           
 	            return "File rỗng.";
 	        }
-	    } catch (IOException | NumberFormatException e) {
-	        return "Lỗi khi đọc key: " + e.getMessage();
-	    }
+	    } 
 	}
 
-	public String saveKey(String filePath) {
-	    try (FileWriter writer = new FileWriter(filePath)) {
-	        for (int i = 0; i < permutationTable.length; i++) {
-	            writer.write(permutationTable[i] + (i < permutationTable.length - 1 ? "," : ""));
-	        }
-	        return "Key đã được lưu tại: " + filePath;
-	    } catch (IOException e) {
-	        return "Lỗi khi lưu key: " + e.getMessage();
-	    }
+	public String saveKey(String filePath) throws IOException {
+		try (FileWriter writer = new FileWriter(filePath);) {
+			for (int i = 0; i < permutationTable.length; i++) {
+				writer.write(permutationTable[i] + (i < permutationTable.length - 1 ? "," : ""));
+			}
+			writer.close();
+			return "Key đã được lưu tại: " + filePath;
+		}
 	}
-
-	
+		
 	public void encryptText(int [] permutationTable) {
 		StringBuilder result = new StringBuilder();
 		int col = permutationTable.length;
@@ -133,7 +127,14 @@ public class PermutationCipher extends ClasscialCipher {
 		}
 			}}
 		return reverseArray;
-		
+	}
+	
+	public int[] getPermutationTable() {
+		return this.permutationTable;
+	}
+	
+	public void setPermutationTable(int [] permutationTable) {
+		this.permutationTable = permutationTable;
 	}
 	
 	public static void main(String[] args) throws IOException {

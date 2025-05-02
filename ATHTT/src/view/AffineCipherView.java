@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.text.NumberFormat;
 
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -18,13 +19,14 @@ public class AffineCipherView extends ClassicalCipherView {
 	public AffineCipherView() {
 		super();
 		createFrame(700, 600, "Affine cipher tool");
-		createPanelTextCipher();
-		createFileCipherPanel();
+		
 		createKeyPanel();
+		createPanelTextCipher();
+		
 		this.getFrame().setLayout(new BorderLayout(10, 10));
-		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
-		this.getFrame().add(this.getFilePanel(), BorderLayout.SOUTH);
 		this.getFrame().add(keyPanel, BorderLayout.NORTH);
+		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
+		
 		this.getFrame().setVisible(true);
 	}
 
@@ -42,7 +44,7 @@ public class AffineCipherView extends ClassicalCipherView {
 		NumberFormatter formatter = new NumberFormatter(format);
 		formatter.setAllowsInvalid(false);
 		formatter.setMinimum(0);
-		formatter.setMaximum(100);
+		formatter.setMaximum(178);
 
 		JFormattedTextField tf1 = ((JSpinner.NumberEditor) spinner1.getEditor()).getTextField();
 		JFormattedTextField tf2 = ((JSpinner.NumberEditor) spinner2.getEditor()).getTextField();
@@ -52,8 +54,14 @@ public class AffineCipherView extends ClassicalCipherView {
 		this.setGenKey("Tạo khoá");
 		this.setLoadKey("Tải khoá");
 		this.setSaveKey("Lưu khoá");
+		
+		JLabel a = new JLabel(" a:");
+		JLabel b = new JLabel("  b:");
+		
 		keyPanel = new JPanel(new FlowLayout());
+		keyPanel.add(a);
 		keyPanel.add(spinner1);
+		keyPanel.add(b);
 		keyPanel.add(spinner2);
 		keyPanel.add(this.getGenKey());
 		keyPanel.add(this.getLoadKey());
@@ -77,7 +85,4 @@ public class AffineCipherView extends ClassicalCipherView {
 		return (int) spinner2.getValue();
 	}
 
-	public static void main(String[] args) {
-		AffineCipherView affcipher = new AffineCipherView();
-	}
 }

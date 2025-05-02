@@ -19,11 +19,11 @@ public class HillCipher extends ClasscialCipher {
 			
 			det = determinant2(matrix);
 		}
-		while(gcd(det, getLengthVietnameseAlphabet()) != 1);
+		while(gcd(det, VIETNAMESE_ALPHABET.length()) != 1);
 	}
 	
 	public void createInvMatrix() {
-		int m = getLengthVietnameseAlphabet();
+		int m = VIETNAMESE_ALPHABET.length();
 		int det = determinant2(matrix);
 		int detInv = modInverse(det, m); 
 
@@ -54,8 +54,8 @@ public class HillCipher extends ClasscialCipher {
 	
 	public void encryptText() {
 		StringBuilder result = new StringBuilder();
-		String alphabet = getVietnameseAlphabet();
-		int m = getLengthVietnameseAlphabet();
+		String alphabet = VIETNAMESE_ALPHABET;
+		int m = VIETNAMESE_ALPHABET.length();
 		if (this.getInput().length() % 2 == 1) {
 			this.setInput(this.getInput() + "Xlk,.");
 		}
@@ -82,8 +82,8 @@ public class HillCipher extends ClasscialCipher {
 	
 	public void decryptText() {
 	    StringBuilder result = new StringBuilder();
-	    String alphabet = getVietnameseAlphabet();
-	    int m = getLengthVietnameseAlphabet();
+	    String alphabet = VIETNAMESE_ALPHABET;
+	    int m = VIETNAMESE_ALPHABET.length();
 	    for (int i = 0; i < getInput().length(); i += 2) {
 	        if (i + 1 < getInput().length()) {
 	            char c1 = getInput().charAt(i);
@@ -110,7 +110,7 @@ public class HillCipher extends ClasscialCipher {
 	}
 	
 	public int determinant2(int [][]matrix) {
-	    int m = getLengthVietnameseAlphabet();
+	    int m = VIETNAMESE_ALPHABET.length();
 	    int det = ((matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]) % m + m) % m;
 	    return det;
 	}
@@ -119,8 +119,8 @@ public class HillCipher extends ClasscialCipher {
 	public int determinant3(int [][]matrix) {
 		int det = (matrix[0][0]* (matrix[1][1] * matrix[2][2] - matrix[2][1] * matrix[1][2]))
 				+ (matrix[0][1]* (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]))
-				+ (matrix[0][2]* (matrix[0][0] * matrix[2][1] - matrix[2][0] * matrix[1][1])) % getLengthVietnameseAlphabet();
-		if (det < 0) det += getLengthVietnameseAlphabet();
+				+ (matrix[0][2]* (matrix[0][0] * matrix[2][1] - matrix[2][0] * matrix[1][1])) % VIETNAMESE_ALPHABET.length();
+		if (det < 0) det += VIETNAMESE_ALPHABET.length();
         return det;
 	}
 	

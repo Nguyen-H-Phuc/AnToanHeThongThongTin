@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.text.NumberFormat;
 
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -12,25 +13,25 @@ import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 
 public class ShiftCipherView extends ClassicalCipherView {
-	JPanel keyPanel;
-	JSpinner spinner;
+	private JPanel keyPanel;
+	private JLabel shiftLabel;
+	private JSpinner spinner;
 	
 	public ShiftCipherView() {
 		super();
-		createFrame(700, 600, "Shift cipher tool");
-		createPanelTextCipher();
-		createFileCipherPanel();
+		createFrame(400, 600, "Shift cipher tool");
 		createKeyPanel();
-		this.getFrame().setLayout(new BorderLayout(10, 10));		
-		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
-		this.getFrame().add(this.getFilePanel(), BorderLayout.SOUTH);
+		createPanelTextCipher();
+		
+		this.getFrame().setLayout(new BorderLayout(10, 10));
 		this.getFrame().add(keyPanel, BorderLayout.NORTH);
+		this.getFrame().add(this.getTextPanel(), BorderLayout.CENTER);
 		this.getFrame().setVisible(true);
 	}
 
 	@Override
 	public void createKeyPanel() {
-		SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 100, 1);
+		SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 178, 1);
 		spinner = new JSpinner(model);
 
 		// Tạo formatter để chỉ cho nhập số
@@ -44,11 +45,15 @@ public class ShiftCipherView extends ClassicalCipherView {
 
 		JFormattedTextField tf = ((JSpinner.NumberEditor) spinner.getEditor()).getTextField();
 		tf.setFormatterFactory(new DefaultFormatterFactory(formatter));
-		keyPanel = new JPanel();
+		
 		this.setGenKey("Tạo khoá");
 		this.setSaveKey("Lưu khoá");
 		this.setLoadKey("Tải khoá");
+		
+		shiftLabel = new JLabel("Khoảng cách dịch chuyển:");
+		
 		keyPanel = new JPanel(new FlowLayout());
+		keyPanel.add(shiftLabel);
 		keyPanel.add(spinner);
 		keyPanel.add(this.getGenKey());
 		keyPanel.add(this.getLoadKey());
@@ -64,5 +69,7 @@ public class ShiftCipherView extends ClassicalCipherView {
 		return (int) spinner.getValue();
 	}
 	
-
+public static void main(String[] args) {
+	new ShiftCipherView();
+}
 }

@@ -2,7 +2,6 @@ package model.classicialcipher;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -20,13 +19,13 @@ public class VigenereCipher extends ClasscialCipher {
 			char c = this.getInput().charAt(i);
 			if (Character.isLetter(c)) {
 				char k = key.charAt(positionKey);
-				int shift = getVietnameseAlphabet().indexOf(k);
+				int shift = VIETNAMESE_ALPHABET.indexOf(k);
 				if (shift == -1) {
 					positionKey = (positionKey + 1) % key.length();
 				} 
-					int charPosition = getVietnameseAlphabet().indexOf(c);
-					char encrypted = getVietnameseAlphabet()
-							.charAt(((charPosition + shift) % getVietnameseAlphabet().length()));
+					int charPosition = VIETNAMESE_ALPHABET.indexOf(c);
+					char encrypted = VIETNAMESE_ALPHABET
+							.charAt(((charPosition + shift) % VIETNAMESE_ALPHABET.length()));
 					result.append(encrypted);
 					positionKey = (positionKey + 1) % key.length();
 				
@@ -44,14 +43,14 @@ public class VigenereCipher extends ClasscialCipher {
 			char c = this.getInput().charAt(i);
 			if (Character.isLetter(c)) {
 				char k = key.charAt(positionKey);
-				int shift = getVietnameseAlphabet().indexOf(k);
+				int shift = VIETNAMESE_ALPHABET.indexOf(k);
 				if (shift == -1) {
 					positionKey = (positionKey + 1) % key.length();
 				}
 				
-				int charPosition = getVietnameseAlphabet().indexOf(c);
-				char encrypted = getVietnameseAlphabet()
-						.charAt(((charPosition - shift + getVietnameseAlphabet().length()) % getVietnameseAlphabet().length()));
+				int charPosition = VIETNAMESE_ALPHABET.indexOf(c);
+				char encrypted = VIETNAMESE_ALPHABET
+						.charAt(((charPosition - shift + VIETNAMESE_ALPHABET.length()) % VIETNAMESE_ALPHABET.length()));
 				result.append(encrypted);
 				positionKey = (positionKey + 1) % key.length();
 				
@@ -66,8 +65,8 @@ public class VigenereCipher extends ClasscialCipher {
 		StringBuilder key = new StringBuilder();
 		Random random = new Random();
 		for (int i = 0; i < keyLength; i++) {
-			int index = random.nextInt(getVietnameseAlphabet().length());
-			key.append(getVietnameseAlphabet().charAt(index));
+			int index = random.nextInt(VIETNAMESE_ALPHABET.length());
+			key.append(VIETNAMESE_ALPHABET.charAt(index));
 		}
 		setKey(key.toString());
 		if (this.key.length() == this.keyLength) {
@@ -78,7 +77,7 @@ public class VigenereCipher extends ClasscialCipher {
 		}
 	}
 	
-	public String loadKey(String filePath) {
+	public String loadKey(String filePath) throws FileNotFoundException, IOException {
 		StringBuilder loadedKey = new StringBuilder();
 		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 			String line;
@@ -87,18 +86,14 @@ public class VigenereCipher extends ClasscialCipher {
 			}
 			setKey(loadedKey.toString());
 			return "SUCCESS";
-		} catch (IOException e) {
-			return "Lỗi khi đọc key: " + e.getMessage();
-		}
+		} 
 	}
 
-	public String saveKey(String filePath) {
+	public String saveKey(String filePath) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(getKey());
             return "SUCCESS";
-        } catch (IOException e) {
-        	 return "Lỗi khi ghi key: " + e.getMessage();
-        }
+        } 
 	}
 	
 	public String getKey() {
@@ -117,7 +112,4 @@ public class VigenereCipher extends ClasscialCipher {
 		this.keyLength = keyLength;
 	}
 	
-	public static void main(String[] args) {
-		
-	}
 }

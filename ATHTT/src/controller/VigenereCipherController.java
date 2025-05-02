@@ -2,8 +2,11 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import model.classicialcipher.VigenereCipher;
+import utils.ViewUtils;
 import view.VigenereCipherView;
 
 public class VigenereCipherController {
@@ -25,13 +28,6 @@ public class VigenereCipherController {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleText("DECRYPT");
-			}
-		});
-
-		this.view.getSaveResultBtn().addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveResult();
 			}
 		});
 
@@ -57,6 +53,10 @@ public class VigenereCipherController {
 				saveKey();
 			}
 		});
+		
+		ViewUtils.setupClearButton(view.getClearTextPanelBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setupSwapButton(view.getSwapBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setSaveResultBtn(view.getSaveResultBtn(), view.getOutputTextArea(), view.getFrame());
 	}
 	
 	private void handleText(String mode) {
@@ -67,15 +67,7 @@ public class VigenereCipherController {
 		this.model.encryptText();}
 		else {this.model.decryptText();}
 		this.view.setOutputText(this.model.getOutput());
-	}
-	
-	private void saveResult() {
-		String filePath = view.showFileDialog("Chọn file", true);
-		if (!filePath.isEmpty()) {
-			this.view.showDialogMessage(this.model.saveOutputToFile(this.view.getOutputText(), filePath),
-					"INFO");
-		}
-	}
+	}	
 	
 	private void genKey() {
 		int keyLength = view.getValueSpinner();
@@ -89,8 +81,15 @@ public class VigenereCipherController {
 	private void loadKey() {
 		String filePath = view.showFileDialog("Chọn file", false);
 		if (!filePath.isEmpty()) {
-			this.view.showDialogMessage(model.loadKey(filePath), "INFO");
-			this.view.setKey(this.model.getKey());
+			try {
+				this.view.showDialogMessage(model.loadKey(filePath), "INFO");
+				this.view.setKey(this.model.getKey());
+			} catch (FileNotFoundException e) {
+				this.view.showDialogMessage("Không tìm thấy file", "ERROR");
+			} catch (IOException e) {
+				this.view.showDialogMessage("Lỗi khi tải khoá: " + e.getMessage(), "ERROR");
+			}
+			
 		}
 	}
 	
@@ -98,11 +97,12 @@ public class VigenereCipherController {
 		this.model.setKey(this.view.getKey());
 		String filePath = view.showFileDialog("Chọn file", true);
 		if (!filePath.isEmpty()) {
-			this.view.showDialogMessage(model.saveKey(filePath), "INFO");
+			try {
+				this.view.showDialogMessage(model.saveKey(filePath), "INFO");
+			} catch (IOException e) {
+				this.view.showDialogMessage("Lỗi khi ghi khoá" + e.getMessage(), "ERROR");
+			}
 		}
 	}
 	
-	public static void main(String[] args) {
-		VigenereCipherController vc = new VigenereCipherController(new VigenereCipher(), new VigenereCipherView());
-	}
 }

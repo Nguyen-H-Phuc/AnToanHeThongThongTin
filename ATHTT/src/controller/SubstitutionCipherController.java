@@ -3,38 +3,36 @@ package controller;
 import view.SubstitutionCipherView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import model.classicialcipher.SubstitutionCipher;
+import utils.ViewUtils;
 
 public class SubstitutionCipherController {
-	private SubstitutionCipherView scv;
+	private SubstitutionCipherView view;
 	private SubstitutionCipher model;
 
-	public SubstitutionCipherController(SubstitutionCipherView scv, SubstitutionCipher model) {
-		this.scv = scv;
+	public SubstitutionCipherController(SubstitutionCipherView view, SubstitutionCipher model) {
+		this.view= view;
 		this.model = model;
 
-		this.scv.getEncryptTextBtn().addActionListener(new ActionListener() {
+		this.view.getEncryptTextBtn().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleEncrypt();
 			}
 		});
 
-		this.scv.getDecryptTextBtn().addActionListener(new ActionListener() {
+		this.view.getDecryptTextBtn().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleDecrypt();
 			}
 		});
 
-		this.scv.getSaveResultBtn().addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveResult();
-			}
-		});
 
-		this.scv.getCreateKey().addActionListener(new ActionListener() {
+		this.view.getGenKey().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				genKey();
@@ -42,7 +40,7 @@ public class SubstitutionCipherController {
 			}
 		});
 		
-		this.scv.getLoadKey().addActionListener(new ActionListener() {
+		this.view.getLoadKey().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				loadKey();
@@ -50,63 +48,72 @@ public class SubstitutionCipherController {
 			}
 		});
 		
-		this.scv.getSaveKey().addActionListener(new ActionListener() {	
+		this.view.getSaveKey().addActionListener(new ActionListener() {	
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				saveKey();
 			}
 		});
-
+		ViewUtils.setupClearButton(view.getClearTextPanelBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setupSwapButton(view.getSwapBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setSaveResultBtn(view.getSaveResultBtn(), view.getOutputTextArea(), view.getFrame());
 	}
 
 	private void genKey() {
 		this.model.generateSubstitutionTable();
+		this.view.updateTableValues(this.model.getEncryptionMap());
 	}
 	
 	private void loadKey() {
-		String filePath= this.scv.showFileChooser();
+		String filePath= this.view.showFileDialog("Chọn file", false);
 		if(!filePath.isEmpty()) {
-		this.scv.showWarningDialog(this.model.loadSubstitutionTable(filePath));
+		try {
+			this.view.updateTableValues(this.model.getEncryptionMap());
+			this.view.showDialogMessage(this.model.loadSubstitutionTable(filePath),"INFO");
+		} catch (FileNotFoundException e) {
+			this.view.showDialogMessage("Không tìm thấy file: " +filePath, "ERROR");
+		} catch (IOException e) {
+			this.view.showDialogMessage("Lỗi khi đọc file: " +e.getMessage(), "ERROR");
+		}
 		}
 	}
 	
 	private void saveKey() {
-		String filePath= this.scv.showFileChooser();
+		String filePath= this.view.showFileDialog("Chọn file", false);
 		if(!filePath.isEmpty()) {
-		this.scv.showWarningDialog(this.model.saveSubstitutionTable(filePath));
+			try {
+				this.model.setEncryptionMap(this.view.getTableValues());
+				this.view.showDialogMessage(this.model.saveSubstitutionTable(filePath),"INFO");
+			} catch (IOException e) {
+				this.view.showDialogMessage("Lỗi khi lưu: " +e.getMessage(), "ERROR");
+			}
 		}
 	}
 
 	private void handleEncrypt() {
+		this.model.setEncryptionMap(this.view.getTableValues());
 		if (this.model.getEncryptionMap().isEmpty()) {
-			this.scv.showWarningDialog("Khoá chưa được tạo!");
+			this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
 		} else {
-			this.model.setInput(scv.getInputText().getText());
+			this.model.setInput(view.getInputText());
 			this.model.encryptText();
 			if (this.model.getOutput().equals("ERROR")) {
-				this.scv.showErrorDiaglog("Mã hoá thất bại!");
 			} else {
-				scv.getOutputText().setText(this.model.getOutput());
+				view.setOutputText(this.model.getOutput());
 			}
 		}
 	}
 
 	private void handleDecrypt() {
+		this.model.setEncryptionMap(this.view.getTableValues());
 		if(this.model.getDecryptionMap().isEmpty()) {
-			this.scv.showWarningDialog("Khoá chưa được tạo!");
+			this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
 		} else {
-		this.model.setInput(scv.getInputText().getText());
+		this.model.setInput(view.getInputText());
 		this.model.decryptText();
-		if (this.model.getOutput().equals("ERROR")) {
-			this.scv.showErrorDiaglog("Giải mã thất bại!");
-		} else {
-			scv.getOutputText().setText(this.model.getOutput());
+		view.setOutputText(this.model.getOutput());
 		}
 	}
-}
 
-	private void saveResult() {
-		this.scv.showWarningDialog(
-				this.model.saveOutputToFile(this.scv.getOutputText().getText(), scv.showFileChooser()));
-	}
+
 }

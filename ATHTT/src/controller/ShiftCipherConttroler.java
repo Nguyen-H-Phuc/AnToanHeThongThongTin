@@ -2,13 +2,15 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import model.classicialcipher.ShiftCipher;
+import utils.ViewUtils;
 import view.ShiftCipherView;
 
 public class ShiftCipherConttroler {
-	ShiftCipher model;
-	ShiftCipherView view;
+	private ShiftCipher model;
+	private ShiftCipherView view;
 	
 	public ShiftCipherConttroler(ShiftCipher model, ShiftCipherView view) {
 		this.model = model;
@@ -28,13 +30,6 @@ public class ShiftCipherConttroler {
 			}
 		});
 
-		this.view.getSaveResultBtn().addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveResult();
-			}
-		});
-
 		this.view.getGenKey().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -43,20 +38,24 @@ public class ShiftCipherConttroler {
 			}
 		});
 	
-//		this.view.getLoadKey().addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				loadKey();
-//				
-//			}
-//		});
-//		
+		this.view.getLoadKey().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				loadKey();
+				
+			}
+		});
+		
 		this.view.getSaveKey().addActionListener(new ActionListener() {	
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				saveKey();
 			}
 		});
+		
+		ViewUtils.setupClearButton(view.getClearTextPanelBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setupSwapButton(view.getSwapBtn(), view.getInputTextArea(), view.getOutputTextArea());
+		ViewUtils.setSaveResultBtn(view.getSaveResultBtn(), view.getOutputTextArea(), view.getFrame());
 	}
 	
 	private void handleText(String mode) {
@@ -72,15 +71,7 @@ public class ShiftCipherConttroler {
 		int shift = this.model.genKey();
 		this.view.setValueSpinner(shift);
 	}
-	
-	private void saveResult() {
-		String filePath = view.showFileDialog("Chọn file", false);
-		if (!filePath.isEmpty()) {
-			this.view.showDialogMessage(this.model.saveOutputToFile(this.view.getOutputText(), filePath),
-					"INFO");
-		}
-	}
-	
+		
 	private void saveKey() {
 		String filePath = view.showFileDialog("Chọn file", true);
 		if (!filePath.isEmpty()) {
@@ -88,9 +79,20 @@ public class ShiftCipherConttroler {
 		}
 
 	}
-
 	
-	public static void main(String[] args) {
-		new ShiftCipherConttroler(new ShiftCipher(), new ShiftCipherView());
+	private void loadKey() {
+		String filePath = view.showFileDialog("Chọn file", false);
+		if (!filePath.isEmpty()) {
+			try {
+				int shift = this.model.loadKey(filePath);
+				this.view.setValueSpinner(shift);
+				this.view.showDialogMessage("Tải khoá thành công", "INFO");
+			} catch (NumberFormatException e) {
+				this.view.showDialogMessage("Khoá bị lỗi: Khoá phải là số nguyên", "ERROR");
+			} catch (IOException e) {
+				this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");
+			}
+		}
 	}
+
 }

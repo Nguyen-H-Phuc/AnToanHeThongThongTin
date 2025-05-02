@@ -1,6 +1,7 @@
 package model.classicialcipher;
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,14 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class SubstitutionCipher {
-	private static final String VIETNAMESE_ALPHABET = "AĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXY" + "aăâbcdđeêghiklmnoôơpqrstuưvxy"
-			+ "ÁÀẢÃẠẮẰẲẴẶẤẦẨẪẬÉÈẺẼẸẾỀỂỄỆÍÌỈĨỊ" + "ÓÒỎÕỌỐỒỔỖỘỚỜỞỠỢÚÙỦŨỤỨỪỬỮỰÝỲỶỸỴ";
-
+public class SubstitutionCipher extends ClasscialCipher {
 	private Map<Character, Character> encryptionMap = new HashMap<>();
 	private Map<Character, Character> decryptionMap = new HashMap<>();
-	private String input;
-	private String output;
+
 
 	// Tạo bảng mã thay thế ngẫu nhiên
 	public void generateSubstitutionTable() {
@@ -37,7 +34,7 @@ public class SubstitutionCipher {
 	}
 
 	// Lưu bảng mã thay thế vào file txt
-	public String saveSubstitutionTable(String filePath) {
+	public String saveSubstitutionTable(String filePath) throws IOException {
 		try (Writer writer = new FileWriter(filePath)) {
 			int count = 0;
 			for (Map.Entry<Character, Character> entry : encryptionMap.entrySet()) {
@@ -51,14 +48,11 @@ public class SubstitutionCipher {
 			} else {
 				return "Lưu key KHÔNG đầy đủ! Chỉ lưu được " + count + " / " + VIETNAMESE_ALPHABET.length();
 			}
-
-		} catch (IOException e) {
-			return "Lỗi khi lưu key: " + e.getMessage();
 		}
 	}
 
 	// Đọc bảng mã thay thế từ file TXT
-	public String loadSubstitutionTable(String filePath) {
+	public String loadSubstitutionTable(String filePath) throws FileNotFoundException, IOException {
 		encryptionMap.clear();
 		decryptionMap.clear();
 
@@ -81,34 +75,26 @@ public class SubstitutionCipher {
 			} else {
 				return "Tải key KHÔNG đầy đủ! Chỉ nạp được " + count + " / " + VIETNAMESE_ALPHABET.length();
 			}
-
-		} catch (IOException e) {
-			return "Không thể tải key: " + e.getMessage();
 		}
 	}
 
 	// Mã hoá văn bản
-	public String encryptText() {
+	public void encryptText() {
 		StringBuilder encryptedText = new StringBuilder();
-		for (char c : input.toCharArray()) {
+		for (char c : this.getInput().toCharArray()) {
 			encryptedText.append(encryptionMap.getOrDefault(c, c));
 		}
-		output = encryptedText.toString();
-		if (output.length() == input.length())
-			return output;
-		return "ERROR";
+		this.setOutput( encryptedText.toString());
+		
 	}
 
 	// Giải mã văn bản
-	public String decryptText() {
+	public void decryptText() {
 		StringBuilder decryptedText = new StringBuilder();
-		for (char c : input.toCharArray()) {
+		for (char c : this.getInput().toCharArray()) {
 			decryptedText.append(decryptionMap.getOrDefault(c, c));
 		}
-		output = decryptedText.toString();
-		if (output.length() == input.length())
-			return output;
-		return "ERROR";
+		this.setOutput(decryptedText.toString());
 	}
 
 	public String saveOutputToFile(String output, String filePath) {
@@ -122,17 +108,6 @@ public class SubstitutionCipher {
 		}
 	}
 
-	public String getInput() {
-		return input;
-	}
-
-	public void setInput(String input) {
-		this.input = input;
-	}
-
-	public String getOutput() {
-		return output;
-	}
 
 	public Map<Character, Character> getEncryptionMap() {
 		return encryptionMap;
@@ -141,5 +116,19 @@ public class SubstitutionCipher {
 	public Map<Character, Character> getDecryptionMap() {
 		return decryptionMap;
 	}
+
+	public void setEncryptionMap(Map<Character, Character> encryptionMap) {
+	    this.encryptionMap = encryptionMap;
+
+	    
+	    for (Map.Entry<Character, Character> entry : encryptionMap.entrySet()) {
+	        Character key = entry.getKey();
+	        Character value = entry.getValue();
+
+	        // Đảo chiều
+	        decryptionMap.put(value, key);
+	    }
+	}
+	
 
 }
