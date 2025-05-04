@@ -236,7 +236,7 @@ public class SymmetricCipherController {
 				this.view.setAlgorithm(algorithm);
 				this.view.setCharSet(charset);
 				this.view.setMode(algorithm, mode);
-				this.view.setPadding(algorithm, padding);
+				this.view.setPadding(padding);
 				this.view.setKeySize(algorithm, keySize);
 				this.view.setBlockSize(algorithm, blockSize);
 				this.view.setKey(key);

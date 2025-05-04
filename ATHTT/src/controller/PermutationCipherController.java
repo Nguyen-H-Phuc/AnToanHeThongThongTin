@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
+
 import model.classicialcipher.PermutationCipher;
 import utils.ViewUtils;
 import view.PermutationCipherView;
@@ -63,13 +65,25 @@ public class PermutationCipherController {
 	private void handleText(String mode) {
 		int[] permutationTable = this.view.getTableValues();
 		this.model.setInput(this.view.getInputText());
-		if (mode.equals("ENCRYPT")) {
-			this.model.encryptText(permutationTable);
-		} else {
-			this.model.decryptText(permutationTable);
+		if (this.model.hasValueGreaterThanIndex(permutationTable)) {
+			this.view.showDialogMessage("Bảng hoán vị không hợp lệ. Không thể tiếp tục.", "ERROR");
+			return;
 		}
-		this.view.setOutputText(this.model.getOutput());
+		int decision = JOptionPane.YES_NO_OPTION;
+		if (this.model.hasDuplicates(permutationTable)) {
+			decision = this.view.showYesNoDialog(
+					"Phát hiện vị trí hoán vị trùng nhau. Việc giải mã có thể bị lỗi hoặc không giải mã được. Bạn có muốn tiếp tục?",
+					"WARN");
+		}
+		if (decision == JOptionPane.YES_OPTION) {
 
+			if (mode.equals("ENCRYPT")) {
+				this.model.encryptText(permutationTable);
+			} else {
+				this.model.decryptText(permutationTable);
+			}
+			this.view.setOutputText(this.model.getOutput());
+		}
 	}
 
 	private void genKey() {

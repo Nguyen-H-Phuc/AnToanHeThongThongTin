@@ -18,6 +18,7 @@ public class AffineCipher extends ClasscialCipher {
 			return gcdEuclid(b, a % b);
 		}
 	}
+	
 	public void genKey() {
 		Random random = new Random();
 		int m = VIETNAMESE_ALPHABET.length();

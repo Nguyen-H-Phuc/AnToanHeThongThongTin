@@ -1,6 +1,5 @@
 package model.classicialcipher;
 
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -10,103 +9,130 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class SubstitutionCipher extends ClasscialCipher {
 	private Map<Character, Character> encryptionMap = new HashMap<>();
 	private Map<Character, Character> decryptionMap = new HashMap<>();
 
 
-	// Tạo bảng mã thay thế ngẫu nhiên
 	public void generateSubstitutionTable() {
-		List<Character> shuffledChars = new ArrayList<>();
-		for (char c : VIETNAMESE_ALPHABET.toCharArray()) {
-			shuffledChars.add(c);
-		}
-		Collections.shuffle(shuffledChars);
+	    // Create a list to hold characters for shuffling
+	    List<Character> shuffledChars = new ArrayList<>();
 
-		for (int i = 0; i < VIETNAMESE_ALPHABET.length(); i++) {
-			encryptionMap.put(VIETNAMESE_ALPHABET.charAt(i), shuffledChars.get(i));
-			decryptionMap.put(shuffledChars.get(i), VIETNAMESE_ALPHABET.charAt(i));
-		}
+	    // Add each character from the Vietnamese alphabet into the list
+	    for (char c : VIETNAMESE_ALPHABET.toCharArray()) {
+	        shuffledChars.add(c);
+	    }
+
+	    // Randomly shuffle the list to create a substitution mapping
+	    Collections.shuffle(shuffledChars);
+
+	    // Build the encryption and decryption maps
+	    for (int i = 0; i < VIETNAMESE_ALPHABET.length(); i++) {
+	        char originalChar = VIETNAMESE_ALPHABET.charAt(i);
+	        char shuffledChar = shuffledChars.get(i);           
+
+	        
+	        encryptionMap.put(originalChar, shuffledChar);
+	        decryptionMap.put(shuffledChar, originalChar);
+	    }
 	}
 
-	// Lưu bảng mã thay thế vào file txt
+
+	// Save the substitution table to a text file
 	public String saveSubstitutionTable(String filePath) throws IOException {
-		try (Writer writer = new FileWriter(filePath)) {
-			int count = 0;
-			for (Map.Entry<Character, Character> entry : encryptionMap.entrySet()) {
-				writer.write(entry.getKey() + " " + entry.getValue() + "\n");
-				count++;
-			}
+	    try (Writer writer = new FileWriter(filePath)) {
+	        int count = 0;  // Counter to track how many pairs are written
 
-			// Kiểm tra số lượng cặp đã ghi
-			if (count == VIETNAMESE_ALPHABET.length()) {
-				return "Lưu key thành công! Số cặp đã lưu: " + count;
-			} else {
-				return "Lưu key KHÔNG đầy đủ! Chỉ lưu được " + count + " / " + VIETNAMESE_ALPHABET.length();
-			}
-		}
+	        // Loop through each key-value pair in the encryption map
+	        for (Map.Entry<Character, Character> entry : encryptionMap.entrySet()) {
+	            // Write the original character and its mapped (substitute) character to the file
+	            writer.write(entry.getKey() + " " + entry.getValue() + "\n");
+	            count++;
+	        }
+
+	        // Check if all expected pairs were saved
+	        if (count == VIETNAMESE_ALPHABET.length()) {
+	            return "Successfully saved key! Number of pairs saved: " + count;
+	        } else {
+	            return "WARNING: Key not fully saved! Only saved " + count + " / " + VIETNAMESE_ALPHABET.length();
+	        }
+	    }
 	}
 
-	// Đọc bảng mã thay thế từ file TXT
+	// Read the substitution table from a TXT file
 	public String loadSubstitutionTable(String filePath) throws FileNotFoundException, IOException {
-		encryptionMap.clear();
-		decryptionMap.clear();
+	    // Clear the existing encryption and decryption maps to avoid mixing old data
+	    encryptionMap.clear();
+	    decryptionMap.clear();
 
-		try (Reader reader = new FileReader(filePath); Scanner scanner = new Scanner(reader)) {
+	   
+	    try (Reader reader = new FileReader(filePath); Scanner scanner = new Scanner(reader)) {
 
-			int count = 0;
-			while (scanner.hasNextLine()) {
-				String[] parts = scanner.nextLine().split(" ");
-				if (parts.length == 2) {
-					char original = parts[0].charAt(0);
-					char substituted = parts[1].charAt(0);
-					encryptionMap.put(original, substituted);
-					decryptionMap.put(substituted, original);
-					count++;
-				}
-			}
+	        int count = 0;  // Counter to track how many pairs are loaded
 
-			if (count == VIETNAMESE_ALPHABET.length()) {
-				return "Tải key thành công! Số cặp đã nạp: " + count;
-			} else {
-				return "Tải key KHÔNG đầy đủ! Chỉ nạp được " + count + " / " + VIETNAMESE_ALPHABET.length();
-			}
-		}
+	        // Read the file line by line
+	        while (scanner.hasNextLine()) {
+	            String[] parts = scanner.nextLine().split(" ");  // Split each line by space
+
+	            // Check if the line has exactly two parts: original and substituted character
+	            if (parts.length == 2) {
+	                char original = parts[0].charAt(0);
+	                char substituted = parts[1].charAt(0);  
+
+	                // Add the pair to both encryption and decryption maps
+	                encryptionMap.put(original, substituted);
+	                decryptionMap.put(substituted, original);
+
+	                count++;
+	            }
+	        }
+
+	        // Check if all expected pairs were successfully loaded
+	        if (count == VIETNAMESE_ALPHABET.length()) {
+	            return "Successfully loaded key! Number of pairs loaded: " + count;
+	        } else {
+	            return "WARNING: Key not fully loaded! Only loaded " + count + " / " + VIETNAMESE_ALPHABET.length();
+	        }
+	    }
 	}
 
-	// Mã hoá văn bản
+
+	// Encrypt the input text using the substitution map
 	public void encryptText() {
-		StringBuilder encryptedText = new StringBuilder();
-		for (char c : this.getInput().toCharArray()) {
-			encryptedText.append(encryptionMap.getOrDefault(c, c));
-		}
-		this.setOutput( encryptedText.toString());
-		
+	    StringBuilder encryptedText = new StringBuilder();  // To store the result
+
+	    // Loop through each character in the input string
+	    for (char c : this.getInput().toCharArray()) {
+	        // Replace the character with its mapped value if it exists,
+	        // otherwise keep the original character
+	        encryptedText.append(encryptionMap.getOrDefault(c, c));
+	    }
+
+	    // Save the final encrypted string as the output
+	    this.setOutput(encryptedText.toString());
 	}
 
-	// Giải mã văn bản
+
+	// Decrypt the input text using the substitution map
 	public void decryptText() {
-		StringBuilder decryptedText = new StringBuilder();
-		for (char c : this.getInput().toCharArray()) {
-			decryptedText.append(decryptionMap.getOrDefault(c, c));
-		}
-		this.setOutput(decryptedText.toString());
+	    StringBuilder decryptedText = new StringBuilder();  // To store the result
+
+	    // Loop through each character in the input string
+	    for (char c : this.getInput().toCharArray()) {
+	        // Replace the character with its mapped original value if it exists,
+	        decryptedText.append(decryptionMap.getOrDefault(c, c));
+	    }
+
+	    // Save the final decrypted string as the output
+	    this.setOutput(decryptedText.toString());
 	}
 
-	public String saveOutputToFile(String output, String filePath) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-			writer.write(output);
-			writer.flush();
-			return "Lưu file thành công: " + filePath;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return "Lỗi khi lưu file: " + e.getMessage();
-		}
-	}
 
 
 	public Map<Character, Character> getEncryptionMap() {
@@ -117,18 +143,32 @@ public class SubstitutionCipher extends ClasscialCipher {
 		return decryptionMap;
 	}
 
+	// Set the encryption map and automatically generate the corresponding decryption map
 	public void setEncryptionMap(Map<Character, Character> encryptionMap) {
-	    this.encryptionMap = encryptionMap;
-
+	    this.encryptionMap = encryptionMap;  // Set the given encryption map
 	    
+	    // Iterate over each entry in the encryption map to generate the decryption map
 	    for (Map.Entry<Character, Character> entry : encryptionMap.entrySet()) {
-	        Character key = entry.getKey();
-	        Character value = entry.getValue();
+	        Character key = entry.getKey();  // The original character (plain text)
+	        Character value = entry.getValue();  // The substituted character (cipher text)
 
-	        // Đảo chiều
-	        decryptionMap.put(value, key);
+	        // Reverse the key-value pair and add to the decryption map
+	        decryptionMap.put(value, key);  // In the decryption map, substitute cipher text with original text
 	    }
 	}
-	
+
+	// Check if there are any duplicate values in the encryption map
+	public boolean hasDuplicateValues() {
+	    Set<Character> seenValues = new HashSet<>();
+
+	    for (Character value : encryptionMap.values()) {
+	        // Try to add the value to the set; if it already exists, add() returns false
+	        if (!seenValues.add(value)) {
+	            // Return true if a duplicate value is found
+	            return true; 
+	        }
+	    }
+	    return false;
+	}
 
 }

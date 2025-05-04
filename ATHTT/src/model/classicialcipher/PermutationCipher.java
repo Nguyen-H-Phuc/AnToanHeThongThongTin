@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class PermutationCipher extends ClasscialCipher {
 	private int [] permutationTable;
@@ -57,64 +59,71 @@ public class PermutationCipher extends ClasscialCipher {
 		}
 	}
 		
-	public void encryptText(int [] permutationTable) {
-		StringBuilder result = new StringBuilder();
-		int col = permutationTable.length;
-		int row = (int) Math.ceil((double) getInput().length()/col);
-		char[][] plainText = new char[row][col];
-		int lengthText = 0;
-		
-		for(int i = 0; i < plainText.length; i++) {
-			for(int j = 0; j<plainText[i].length; j++) {
-				if(lengthText >= this.getInput().length()) {
-					plainText[i][j] = '-';
-				}
-				else {
-				plainText[i][j] = this.getInput().charAt(lengthText);
-				lengthText++;
-				}
-			}
-		}
-		
-		for(int i = 0; i < plainText.length; i++) {
-			for(int j = 0; j < col; j++) {
-				result.append(plainText[i][permutationTable[j]]);
-			}
-		}
-		
-		setOutput(result.toString());
+	public void encryptText(int[] permutationTable) {
+	    StringBuilder result = new StringBuilder();
+	    int col = permutationTable.length;
+	    String input = getInput();
+	    int inputLength = input.length();
+
+	    // Tính số hàng cần thiết (có thể dư, điền thêm ký tự '-')
+	    int row = (int) Math.ceil((double) inputLength / col);
+
+	    // Duyệt từng hàng
+	    for (int i = 0; i < row; i++) {
+	        // Duyệt từng cột dựa trên permutationTable
+	        for (int j = 0; j < col; j++) {
+	            // Xác định chỉ số thực trong input: hàng * số cột + cột thực tế
+	            int indexInInput = i * col + permutationTable[j];
+
+	            if (indexInInput >= inputLength) {
+	                // Nếu vượt ngoài input → điền ký tự '-'
+	                result.append('-');
+	            } else {
+	                // Nếu trong phạm vi → lấy ký tự tương ứng
+	                result.append(input.charAt(indexInInput));
+	            }
+	        }
+	    }
+
+	    // Gán kết quả mã hóa ra output
+	    setOutput(result.toString());
 	}
-	
-	public void decryptText(int [] permutationTable) {
-		StringBuilder result = new StringBuilder();
-		int col = permutationTable.length;
-		int row = (int) Math.ceil((double) getInput().length() / col);
-		char[][] cipherText = new char[row][col];
-		int lengthText = 0;
-		
-		for (int i = 0; i < cipherText.length; i++) {
-			for (int j = 0; j < cipherText[i].length; j++) {
-				if (lengthText >= this.getInput().length()) {
-					cipherText[i][j] = '-';
-				} else {
-					cipherText[i][j] = this.getInput().charAt(lengthText);
-					lengthText++;
-				}
-			}
-		}
-		
-		int []reverseArray = reverseArrayPermutation(permutationTable);
-		for(int i = 0; i < cipherText.length; i++) {
-			for(int j = 0; j < col; j++) {
-				char c = cipherText[i][reverseArray[j]];
-				if(c != '-') {
-				result.append(c);
-				}
-			}
-		}
-		
-		setOutput(result.toString());
+
+	public void decryptText(int[] permutationTable) {
+	    StringBuilder result = new StringBuilder();
+	    String input = getInput();
+	    int col = permutationTable.length;
+	    int inputLength = input.length();
+
+	    // Calculate the number of rows (rounded up if needed)
+	    int row = (int) Math.ceil((double) inputLength / col);
+
+	    // Create a reversed permutation array
+	    int[] reverseArray = reverseArrayPermutation(permutationTable);
+
+	    // Loop over each row
+	    for (int i = 0; i < row; i++) {
+	        // Loop over each column (using the reversed permutation order)
+	        for (int j = 0; j < col; j++) {
+	            // Calculate the index in the input string
+	            int indexInInput = i * col + reverseArray[j];
+
+	            // Check if we are within the actual input length
+	            if (indexInInput < inputLength) {
+	                char c = input.charAt(indexInInput);
+
+	                // Ignore padding characters (e.g., '-')
+	                if (c != '-') {
+	                    result.append(c);
+	                }
+	            }
+	        }
+	    }
+
+	    // Set the decrypted output
+	    setOutput(result.toString());
 	}
+
 	
 	public int[] reverseArrayPermutation (int [] permutationTable) {
 		int [] reverseArray = new int[permutationTable.length];
@@ -137,9 +146,23 @@ public class PermutationCipher extends ClasscialCipher {
 		this.permutationTable = permutationTable;
 	}
 	
-	public static void main(String[] args) throws IOException {
-		 PermutationCipher pc = new PermutationCipher();
-		 pc.genKey(7);
-		 System.out.println(pc.loadKey("D:\\test\\key.txt"));
+	public boolean hasDuplicates(int[] array) {
+	    Set<Integer> seen = new HashSet<>();
+	    for (int num : array) {
+	        if (!seen.add(num)) {
+	            return true; // Có trùng
+	        }
+	    }
+	    return false; // Không trùng
 	}
+
+	public boolean hasValueGreaterThanIndex(int[] array) {
+	    for (int i = 0; i < array.length; i++) {
+	        if (array[i] > array.length) {
+	            return true; // Có phần tử lớn hơn index
+	        }
+	    }
+	    return false; // Không có
+	}
+
 }

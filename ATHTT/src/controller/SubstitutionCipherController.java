@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
+
 import model.classicialcipher.SubstitutionCipher;
 import utils.ViewUtils;
 
@@ -79,7 +81,7 @@ public class SubstitutionCipherController {
 	}
 	
 	private void saveKey() {
-		String filePath= this.view.showFileDialog("Chọn file", false);
+		String filePath= this.view.showFileDialog("Chọn file", true);
 		if(!filePath.isEmpty()) {
 			try {
 				this.model.setEncryptionMap(this.view.getTableValues());
@@ -92,14 +94,22 @@ public class SubstitutionCipherController {
 
 	private void handleEncrypt() {
 		this.model.setEncryptionMap(this.view.getTableValues());
-		if (this.model.getEncryptionMap().isEmpty()) {
-			this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
-		} else {
-			this.model.setInput(view.getInputText());
-			this.model.encryptText();
-			if (this.model.getOutput().equals("ERROR")) {
-			} else {
-				view.setOutputText(this.model.getOutput());
+		int decision = JOptionPane.YES_OPTION;
+		if (this.model.hasDuplicateValues()) {
+			decision = this.view.showYesNoDialog(
+					"Có kí tự thay thế bị trùng. Việc giải mã có thể bị lỗi hoặc không giải mã được. Bạn có muốn tiếp tục?",
+					"WARN");
+			if (decision == JOptionPane.YES_OPTION) {
+				if (this.model.getEncryptionMap().isEmpty()) {
+					this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
+				} else {
+					this.model.setInput(view.getInputText());
+					this.model.encryptText();
+					if (this.model.getOutput().equals("ERROR")) {
+					} else {
+						view.setOutputText(this.model.getOutput());
+					}
+				}
 			}
 		}
 	}

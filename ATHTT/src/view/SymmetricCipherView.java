@@ -24,7 +24,7 @@ public class SymmetricCipherView extends ClassicalCipherView {
 	private JPanel keyPanel;	
 	private final Map<String, String[]> keySizes = createKeySizes();
 	private final Map<String, String[]> modes = createModes();
-	private final Map<String, String[]> paddings = createPaddings();
+//	private final Map<String, String[]> paddings = createPaddings();
 	private final Map<String, String[]> blockSizes = createBlockSizes();
 	private JTextField key;
 	
@@ -53,7 +53,7 @@ public class SymmetricCipherView extends ClassicalCipherView {
 	    key = new JTextField();	 
 	    keySizeBox = new JComboBox<>();
 	    modeBox = new JComboBox<>();
-	    paddingBox = new JComboBox<>();
+	    paddingBox = new JComboBox<>(new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
 	    blockSizeBox = new JComboBox<>();
 	    charsetBox = new JComboBox<>(new String[]{"UTF-8","UTF-16", "ISO-8859-1", "US-ASCII"});
 
@@ -143,22 +143,22 @@ public class SymmetricCipherView extends ClassicalCipherView {
         return modes;
     }
 
-    private Map<String, String[]> createPaddings() {
-        Map<String, String[]> paddings = new HashMap<>();
-
-        paddings.put("AES", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "ZeroPadding", "NoPadding"});
-        paddings.put("DES", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding",  "ZeroPadding", "NoPadding"});
-        paddings.put("Blowfish", new String[]{"PKCS5Padding", "PKCS7Padding", "ZeroPadding", "NoPadding"});
-        paddings.put("Camellia", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
-        paddings.put("CAST5", new String[]{"PKCS5Padding", "PKCS7Padding", "ZeroPadding", "NoPadding"});
-        paddings.put("RC5", new String[]{"PKCS5Padding", "PKCS7Padding", "ZeroPadding", "NoPadding"});
-        paddings.put("TEA", new String[]{"PKCS7Padding", "ZeroPadding", "NoPadding"});
-        paddings.put("DESede", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "ZeroPadding", "NoPadding"});
-        paddings.put("Twofish", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
-        paddings.put("XTEA", new String[]{"PKCS7Padding", "ZeroPadding", "NoPadding"});
-        
-        return paddings;
-    }
+//    private Map<String, String[]> createPaddings() {
+//        Map<String, String[]> paddings = new HashMap<>();
+//
+//        paddings.put("AES", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
+//        paddings.put("DES", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
+//        paddings.put("Blowfish", new String[]{"PKCS5Padding", "PKCS7Padding","ISO10126Padding", "NoPadding"});
+//        paddings.put("Camellia", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
+//        paddings.put("CAST5", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
+//        paddings.put("RC5", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding","NoPadding"});
+//        paddings.put("TEA", new String[]{"PKCS5Padding","PKCS7Padding", "ISO10126Padding","NoPadding"});
+//        paddings.put("DESede", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
+//        paddings.put("Twofish", new String[]{"PKCS5Padding", "PKCS7Padding", "ISO10126Padding", "NoPadding"});
+//        paddings.put("XTEA", new String[]{"PKCS5Padding","PKCS7Padding","ISO10126Padding", "NoPadding"});
+//        
+//        return paddings;
+//    }
 
 	private Map<String, String[]> createBlockSizes() {
 		Map<String, String[]> blockSizes = new HashMap<>();
@@ -181,7 +181,7 @@ public class SymmetricCipherView extends ClassicalCipherView {
         String algorithm = (String) algorithmBox.getSelectedItem();
         keySizeBox.setModel(new DefaultComboBoxModel<>(keySizes.get(algorithm)));
         modeBox.setModel(new DefaultComboBoxModel<>(modes.get(algorithm)));
-        paddingBox.setModel(new DefaultComboBoxModel<>(paddings.get(algorithm)));
+//        paddingBox.setModel(new DefaultComboBoxModel<>(paddings.get(algorithm)));
         blockSizeBox.setModel(new DefaultComboBoxModel<>(blockSizes.get(algorithm)));
 	}
     
@@ -322,25 +322,42 @@ public class SymmetricCipherView extends ClassicalCipherView {
 	    }
 	}
 	
-	public void setPadding(String algorithm, String padding) {
-		String[] paddingS = paddings.get(algorithm);
-
-		if (paddingS == null) {
-			return;
-		}
-
+//	public void setPadding(String algorithm, String padding) {
+//		String[] paddingS = paddings.get(algorithm);
+//
+//		if (paddingS == null) {
+//			return;
+//		}
+//
+//		boolean found = false;
+//		for (String padding1 : paddingS) {
+//			if (padding1.equals(padding)) {
+//				modeBox.setSelectedItem(padding);
+//				found = true;
+//				break;
+//			}
+//		}
+//
+//		if (!found) {
+//			// Có thể set về giá trị đầu tiên nếu muốn:
+//			paddingBox.setSelectedIndex(0);
+//		}
+//	}
+	
+	public void setPadding(String padding) {
+		ComboBoxModel<String> model = paddingBox.getModel();
 		boolean found = false;
-		for (String padding1 : paddingS) {
-			if (padding1.equals(padding)) {
-				modeBox.setSelectedItem(padding);
+
+		for (int i = 0; i < model.getSize(); i++) {
+			if (model.getElementAt(i).equals(padding)) {
+				paddingBox.setSelectedItem(padding);
 				found = true;
 				break;
 			}
 		}
 
 		if (!found) {
-			// Có thể set về giá trị đầu tiên nếu muốn:
-			paddingBox.setSelectedIndex(0);
+			paddingBox.setSelectedIndex(0); // chọn giá trị đầu tiên
 		}
 	}
 

@@ -101,8 +101,6 @@ public class SubstitutionCipherView extends ClassicalCipherView {
 	        Object keyObj = tableModel.getValueAt(i, 0);  // cột 0
 	        Object valueObj = tableModel.getValueAt(i, 1);  // cột 1
 
-	        System.out.println("Row " + i + ": keyObj=" + keyObj + ", valueObj=" + valueObj);
-
 	        if (keyObj != null && valueObj != null) {
 	            String keyStr = keyObj.toString().trim();
 	            String valueStr = valueObj.toString().trim();
