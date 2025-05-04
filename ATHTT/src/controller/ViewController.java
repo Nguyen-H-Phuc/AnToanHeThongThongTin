@@ -3,11 +3,13 @@ package controller;
 import javax.swing.JOptionPane;
 
 import model.classicialcipher.AffineCipher;
+import model.classicialcipher.HillCipher;
 import model.classicialcipher.PermutationCipher;
 import model.classicialcipher.ShiftCipher;
 import model.classicialcipher.SubstitutionCipher;
 import model.classicialcipher.VigenereCipher;
 import view.AffineCipherView;
+import view.HillCipherView;
 import view.PermutationCipherView;
 import view.ShiftCipherView;
 import view.SubstitutionCipherView;
@@ -28,15 +30,14 @@ public class ViewController {
 		view.getVigenereCipherBtn().addActionListener(e -> openVigenereCipherView());
 		view.getPermutationCipher().addActionListener(e ->openPermuationCipherView());
 		view.getAffineCipherBtn().addActionListener(e ->openAffineCipherView());
-		view.getHillCipherBtn().addActionListener(e-> showNotImplemented());
+		view.getHillCipherBtn().addActionListener(e-> openHillCipherView());
 		
-		view.getSymmetricCipherBtn().addActionListener(e ->showNotImplemented());
+		view.getSymmetricCipherBtn().addActionListener(e ->openSymmetricCipher());
 		view.getAsymmetricCipherBtn().addActionListener(e -> openRSAView());
 		view.getHashBtn().addActionListener(e -> openHashView());
 	}
 
 	private void openSubstitutionView() {
-		
 		SubstitutionCipher subModel = new SubstitutionCipher();
 		SubstitutionCipherView subView = new SubstitutionCipherView(subModel.getVietnameseAlphabet().length(), subModel.getVietnameseAlphabet());
 		new SubstitutionCipherController(subView, subModel);
@@ -64,6 +65,14 @@ public class ViewController {
 		new PermutationCipherController(perCipher, permuationView);
 	}
 	
+	private void openHillCipherView() {
+		new HillCipherController(new HillCipher(), new  HillCipherView(2));
+	}
+	
+	private void openSymmetricCipher() {
+		new SymmetricCipherController();
+	}
+	
 	private void openRSAView() {
 		RSAController rsaController = new RSAController();
 	}
@@ -72,10 +81,10 @@ public class ViewController {
 		HashController hashController = new HashController();
 	}
 	
-
 	private void showNotImplemented() {
 		JOptionPane.showMessageDialog(null, "Tính năng này chưa được triển khai.");
 	}
+	
 	public static void main(String[] args) {
 		View v = new View();
 		ViewController vc = new ViewController(v);

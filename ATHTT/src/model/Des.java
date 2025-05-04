@@ -11,6 +11,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -20,18 +21,14 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Base64;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 public class Des {
 	private SecretKey key;
-	private String algorithm, mode, padding, charset;
-	private int keySize, blockSize;
+	private String algorithm, mode, padding, charset, keySize, blockSize, encodedKey;
 
 	public Des() {
 		super();
@@ -52,7 +49,7 @@ public class Des {
         }
     }
 	
-	public void saveKey(String filePath) throws IOException {
+	public void saveKey(String filePath, String algorithm, String mode, String padding, String charset, String keySize, String blockSize) throws IOException {
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 	        writer.write("algorithm=" + algorithm);
 	        writer.newLine();
@@ -66,10 +63,11 @@ public class Des {
 	        writer.newLine();
 	        writer.write("blockSize=" + blockSize);
 	        writer.newLine();
-	        
+	        if(key!=null) {
 	        // Key là dạng bytes ➔ encode base64 trước
 	        String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
 	        writer.write("key=" + encodedKey);
+	        }
 	    }
 	}
 	
@@ -83,17 +81,21 @@ public class Des {
 	    mode = props.getProperty("mode");
 	    padding = props.getProperty("padding");
 	    charset = props.getProperty("charset");
-	    keySize = Integer.parseInt(props.getProperty("keySize"));
-	    blockSize = Integer.parseInt(props.getProperty("blockSize"));
-
-	    String encodedKey = props.getProperty("key");
-	    byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
-	    key = new SecretKeySpec(decodedKey, algorithm);
+	    keySize = props.getProperty("keySize");
+	    blockSize = props.getProperty("blockSize");
+	    encodedKey = props.getProperty("key");
+	    
+//	    byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+//	    key = new SecretKeySpec(decodedKey, algorithm);
 	}
 	
 	public IvParameterSpec generateIV(String mode, int blockSize) {
 		if (requiresIV(mode)) {
+			if (mode.equalsIgnoreCase("CCM")) {
+				blockSize = 12;
+			}
 			byte[] ivBytes = new byte[blockSize];
+
 			new SecureRandom().nextBytes(ivBytes);
 			return new IvParameterSpec(ivBytes);
 		} else
@@ -162,6 +164,9 @@ public class Des {
 		byte[] actualEncrypted;
 
 		if (requiresIV(mode)) {
+			if(mode.equalsIgnoreCase("CCM")) {
+				blockSize =12;
+			}
 			byte[] ivBytes = new byte[blockSize];
 			System.arraycopy(data, 0, ivBytes, 0, blockSize);
 			iv = new IvParameterSpec(ivBytes);
@@ -193,128 +198,155 @@ public class Des {
 	           mode.equalsIgnoreCase("CFB") ||
 	           mode.equalsIgnoreCase("OFB") ||
 	           mode.equalsIgnoreCase("CTR") ||
-	           mode.equalsIgnoreCase("GCM"); //||
-//	           mode.equalsIgnoreCase("CCM");
+	           mode.equalsIgnoreCase("GCM") ||
+	           mode.equalsIgnoreCase("CCM") ||
+	           mode.equalsIgnoreCase("PCBC");
 	}
-
-//	private byte[] encryptFile(String src, String dest)
-//			throws NoSuchAlgorithmException, NoSuchPaddingException, FileNotFoundException {
-//		Cipher cipher = Cipher.getInstance("DES");
-//		CipherInputStream cis = new CipherInputStream(new FileInputStream(src), cipher);
-//		return null;
-//	}
 	
-	public void encryptFile(String data, String dest) throws Exception {
-	       Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+	public void encryptFile(String srcFile, String destFile, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, FileNotFoundException, IOException, NoSuchProviderException, IllegalBlockSizeException, BadPaddingException {
+	       Cipher cipher = getCipher(instance);
 	       // Tạo IV ngẫu nhiên
 	       byte[] iv = new byte[16];
 	       new SecureRandom().nextBytes(iv);
 	       IvParameterSpec ivSpec = new IvParameterSpec(iv);
 	       cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-	       try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(data));
-	            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dest))) {
+	       try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(srcFile));
+	            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
 	           // Ghi IV vào đầu file
 	           bos.write(iv);
-	           CipherOutputStream cos = new CipherOutputStream(bos, cipher);
-	           byte[] buffer = new byte[1024];
-	           int bytesRead;
-	           while ((bytesRead = bis.read(buffer)) != -1) {
-	               cos.write(buffer, 0, bytesRead);
-	           }
-	           cos.flush();
+	           try (CipherOutputStream cos = new CipherOutputStream(bos, cipher)) {
+				byte[] buffer = new byte[1024];
+				   int bytesRead;
+				   while ((bytesRead = bis.read(buffer)) != -1) {
+				       cos.write(buffer, 0, bytesRead);
+				   }
+				   cos.flush();
+			}
 	       }
 	   }
+	
+	public void encryptFile(String srcFile, String destFile, String instance, String mode)
+	        throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+	               InvalidAlgorithmParameterException, IOException, NoSuchProviderException {
+
+	    Cipher cipher = getCipher(instance);
+	    int blockSize = cipher.getBlockSize();
+	    byte[] ivBytes = new byte[blockSize];
+	    IvParameterSpec iv = null;
+
+	    if (requiresIV(mode)) {
+	        SecureRandom random = new SecureRandom();
+	        random.nextBytes(ivBytes);
+	        iv = new IvParameterSpec(ivBytes);
+	        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+	    } else {
+	        cipher.init(Cipher.ENCRYPT_MODE, key);
+	    }
+
+	    try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(srcFile));
+	         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
+
+	        // Ghi IV vào đầu file nếu có
+	        if (requiresIV(mode)) {
+	            bos.write(ivBytes);
+	        }
+
+	        try (CipherOutputStream cos = new CipherOutputStream(bos, cipher)) {
+				byte[] buffer = new byte[1024];
+				int bytesRead;
+				while ((bytesRead = bis.read(buffer)) != -1) {
+				    cos.write(buffer, 0, bytesRead);
+				}
+				
+				cos.flush();
+			}
+	    }
+	}
+
 	   // Giải mã file
-	   public void decryptFile(String data, String dest) throws Exception {
-	       Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-	       try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(data));
-	            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dest))) {
-	           // Đọc IV từ file
-	           byte[] iv = new byte[16];
-	           bis.read(iv);
-	           IvParameterSpec ivSpec = new IvParameterSpec(iv);
-	           cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
-	           CipherInputStream cis = new CipherInputStream(bis, cipher);
-	           byte[] buffer = new byte[1024];
-	           int bytesRead;
-	           while ((bytesRead = cis.read(buffer)) != -1) {
-	               bos.write(buffer, 0, bytesRead);
-	           }
-	           bos.flush();
-	       }
-	   }
+	public void decryptFile(String srcFile, String destFile, String instance, String mode)
+	        throws NoSuchAlgorithmException, NoSuchPaddingException, IOException,
+	               InvalidKeyException, InvalidAlgorithmParameterException, NoSuchProviderException {
 
-	
-	public String getKey() {
-		return Base64.getEncoder().encodeToString(key.getEncoded());
-	}
-	
-	public String setKey(String encodedKey, String algorithm, int keyLength) {
-		byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
-		if (decodedKey.length > keyLength) {
-	        return encodedKey + " dài hơn " + keyLength + " bytes, dư " + (decodedKey.length - keyLength) + " byte";
-	    }
-	    if (decodedKey.length < keyLength) {
-	        return encodedKey + " ngắn hơn " + keyLength + " bytes, thiếu " + (keyLength - decodedKey.length) + " byte";
-	    }
-		key = new SecretKeySpec(decodedKey, algorithm);
-		return null;
-	}
-	
+	    Cipher cipher = getCipher(instance);
+	    int blockSize = cipher.getBlockSize();
+	    byte[] ivBytes = new byte[blockSize];
+	    IvParameterSpec iv = null;
 
-	public static void main(String[] args) throws Exception {
-//		String data = "Bị dẫn 0-3, nhưng CLB TP HCM vẫn thắng ngược đại diện UAE Abu Dhabi Country 5-4 ở tứ kết AFC Champions League nữ 2024 trên sân Thống Nhất tối 22/3.";
-//		Des des = new Des();
-//		des.genKey("ChaCha20",256);
-//		String dataEncrypt = des.encryptString(data, "ChaCha20", "ECB", "NoPadding", 128, "UTF-8");
-//		System.out.println(dataEncrypt);
-//		String dataDe = des.decryptString(dataEncrypt,"ChaCha20", "ECB", "NoPadding", 128, "UTF-8");
-//		System.out.println(dataDe);
-//		System.out.println(des.getKey());
-		Security.addProvider(new BouncyCastleProvider());
-//		  for (Provider provider : Security.getProviders()) {
-//	            System.out.println("Provider: " + provider.getName());
-//	            for (Provider.Service service : provider.getServices()) {
-//	                if (service.getType().equalsIgnoreCase("Cipher")) {
-//	                    System.out.println("Cipher: " + service.getAlgorithm());
-//	                }
-//	            }
-//	        }
-		 Set<String> symmetricAlgorithms = new HashSet<>();
-	        Provider[] providers = Security.getProviders();
+	    try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(srcFile));
+	         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
 
-	        System.out.println("Các thuật toán mã hóa đối xứng được hỗ trợ bởi Java (các provider mặc định):");
+	        if (requiresIV(mode)) {
+	            // Đọc IV từ đầu file
+	            if (bis.read(ivBytes) != blockSize) {
+	                throw new IOException("Không thể đọc đủ IV từ file");
+	            }
+	            iv = new IvParameterSpec(ivBytes);
+	            cipher.init(Cipher.DECRYPT_MODE, key, iv);
+	        } else {
+	            cipher.init(Cipher.DECRYPT_MODE, key);
+	        }
 
-	        for (Provider provider : providers) {
-	            for (Provider.Service service : provider.getServices()) {
-	                if (service.getType().equalsIgnoreCase("Cipher")) {
-	                    String algorithm = service.getAlgorithm().toUpperCase();
-	                    // Lọc các thuật toán đối xứng phổ biến (có thể không đầy đủ)
-	                    if (algorithm.contains("AES") //||
-//	                        algorithm.contains("DES") ||
-//	                        algorithm.contains("BLOWFISH") ||
-//	                        algorithm.contains("TWOFISH") ||
-//	                        algorithm.contains("RC2") ||
-//	                        algorithm.contains("RC4") ||
-//	                        algorithm.contains("RC5") ||
-//	                        algorithm.contains("RC6") ||
-//	                        algorithm.contains("SERPENT") ||
-//	                        algorithm.contains("SKIPJACK") ||
-//	                        algorithm.contains("IDEA") ||
-//	                        algorithm.contains("CAST5") ||
-//	                        algorithm.contains("CAST6") ||
-//	                        algorithm.contains("SEED") ||
-//	                        algorithm.contains("SM4") ||
-//	                        algorithm.contains("GOST28147") // GOST thường được coi là đối xứng
-	                    ) {
-	                        symmetricAlgorithms.add(algorithm);
-	                    }
-	                }
+	        // Bọc CipherInputStream sau khi đã đọc IV
+	        try (CipherInputStream cis = new CipherInputStream(bis, cipher)) {
+	            byte[] buffer = new byte[1024];
+	            int bytesRead;
+	            while ((bytesRead = cis.read(buffer)) != -1) {
+	                bos.write(buffer, 0, bytesRead);
 	            }
 	        }
 
-	        for (String algorithm : symmetricAlgorithms) {
-	            System.out.println("- " + algorithm);
-	        }
+	        bos.flush();
+	    }
 	}
+
+	public String getKey() {
+		if(key!=null) {
+		return Base64.getEncoder().encodeToString(key.getEncoded());
+		}return "";
+	}
+	
+	public void setKey(String encodedKey, String algorithm) {
+		byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+		key = new SecretKeySpec(decodedKey, algorithm);
+	}
+	
+	public void clearKey() {
+		this.key = null;
+	}
+	
+	public String getAlgorithm() {
+		return algorithm;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public String getPadding() {
+		return padding;
+	}
+
+	public String getCharset() {
+		return charset;
+	}
+
+	public String getKeySize() {
+		return keySize;
+	}
+
+	public String getBlockSize() {
+		return blockSize;
+	}
+	
+	public String getEncodedKey() {
+		return encodedKey;
+	}
+
+	public void clearLoadKey() {
+		this.algorithm = null;
+		 this.mode = null; this.padding=null; this.charset=null;
+		this.keySize=null; this.blockSize=null; this.encodedKey=null;
+	}
+
 }

@@ -4,7 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class View  {
-	private JButton substitutionCipherBtn, shiftCipherBtn, vigenereCipherBtn, permutationCipherBtn, hillCipherBtn, affineCipherBtn, symmetricCipherBtn, asymmetricCipherBtn, hashBtn;
+	private JButton substitutionCipherBtn, shiftCipherBtn, vigenereCipherBtn, permutationCipherBtn, hillCipherBtn,
+			affineCipherBtn, symmetricCipherBtn, asymmetricCipherBtn, hashBtn;
 	private JFrame mainFrame;
 	private JPanel mainPanel;
 

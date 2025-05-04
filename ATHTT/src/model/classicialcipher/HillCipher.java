@@ -1,13 +1,23 @@
 package model.classicialcipher;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 public class HillCipher extends ClasscialCipher {
 	int [][] matrix;
 	int [][] invMatrix;
+		
+	public HillCipher() {
+		this.matrix = new int[2][2];
+		this.invMatrix = new int[2][2];
+	}
 	
-	public void genKey(int dimension) {
-		matrix = new int [dimension][dimension];
+	public void genKey() {
 		Random random = new Random();
 		int det = 0;
 		do {
@@ -25,10 +35,10 @@ public class HillCipher extends ClasscialCipher {
 	public void createInvMatrix() {
 		int m = VIETNAMESE_ALPHABET.length();
 		int det = determinant2(matrix);
-		int detInv = modInverse(det, m); 
-
-		invMatrix = new int[2][2];
-
+		Integer detInv = modInverse(det, m);
+		if(checkMatrix(detInv)) {
+		this.invMatrix = new int[2][2];
+		
 		invMatrix[0][0] = (matrix[1][1] * detInv) % m;
 		invMatrix[0][1] = (-matrix[0][1] * detInv) % m;
 		invMatrix[1][0] = (-matrix[1][0] * detInv) % m;
@@ -40,16 +50,39 @@ public class HillCipher extends ClasscialCipher {
 			}
 		}
 	}
-
+		else {clearInvMatrix();}
+}
 	
-	public String loadKey(String filePath) {
-		String message = "";
-		return message;
+	public String loadKey(String filePath) throws FileNotFoundException, IOException, NumberFormatException {
+	    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+	        for (int i = 0; i < 2; i++) {
+	            String line = reader.readLine();
+	            if (line == null) {
+	                return "Lỗi: file không đủ dữ liệu";
+	            }
+	            String[] parts = line.trim().split("\\s+");
+	            if (parts.length < 2) {
+	                return "Lỗi: dòng " + (i + 1) + " không đủ dữ liệu";
+	            }
+	            for (int j = 0; j < 2; j++) {
+	                matrix[i][j] = Integer.parseInt(parts[j]);
+	            }
+	        }
+	        return "Đã load thành công";
+	    } 
 	}
 	
-	public String saveKey(String filePath) {
-		String message = "";
-		return message;
+	public String saveKey(String filePath) throws IOException  {
+	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+	        for (int i = 0; i < matrix.length; i++) {
+	            for (int j = 0; j < matrix[i].length; j++) {
+	            	System.out.println(matrix[i][j]);
+	                writer.write(matrix[i][j] + " ");
+	            }
+	            writer.newLine();
+	        }
+	        return "Đã lưu thành công";
+	    } 
 	}
 	
 	public void encryptText() {
@@ -115,46 +148,52 @@ public class HillCipher extends ClasscialCipher {
 	    return det;
 	}
 
-	
-	public int determinant3(int [][]matrix) {
-		int det = (matrix[0][0]* (matrix[1][1] * matrix[2][2] - matrix[2][1] * matrix[1][2]))
-				+ (matrix[0][1]* (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]))
-				+ (matrix[0][2]* (matrix[0][0] * matrix[2][1] - matrix[2][0] * matrix[1][1])) % VIETNAMESE_ALPHABET.length();
-		if (det < 0) det += VIETNAMESE_ALPHABET.length();
-        return det;
-	}
-	
-	public int modInverse(int a, int m) {
+	public Integer modInverse(int a, int m) {
 	    a = a % m;
 	    for (int x = 1; x < m; x++) {
 	        if ((a * x) % m == 1)
 	            return x;
 	    }
-	    throw new ArithmeticException("Modular inverse does not exist");
+	    return null;
+	}
+	
+	public boolean checkMatrix(Integer i) {
+		return i != null;
 	}
 
-	
-	 public int gcd(int a, int b) {
-	        while (b != 0) {
-	            int temp = b;
-	            b = a % b;
-	            a = temp;
-	        }
-	        return a;
-	    }
+	 public int[][] getMatrix(){
+		 return this.matrix;
+	 }
 	 
-	 public static void main(String[] args) {
+	 public int[][] getInvMatrix(){
+		 return this.invMatrix;
+	 }
+	 
+	 public void setMatrix(int[][] matrix) {
+		 if(matrix!=null) {
+		 this.matrix = matrix;
+		 createInvMatrix();
+		 }
+	 }
+	 
+	 public void clearInvMatrix() {
+		 this.invMatrix = null;
+	 }
+	 
+	 public static void main(String[] args) throws IOException {
 		HillCipher hc = new HillCipher();
-		hc.genKey(2);		
-		hc.createInvMatrix();
-		hc.setInput("Chúng tôi");
-		hc.encryptText();
-		System.out.println(hc.getOutput());
-		
-		hc.setInput(hc.getOutput());
-		hc.decryptText();
-		System.out.println(hc.getOutput());
-
+//		hc.genKey();		
+//		hc.createInvMatrix();
+//		hc.setInput("Chúng tôi");
+//		hc.encryptText();
+//		System.out.println(hc.getOutput());
+//		
+//		hc.setInput(hc.getOutput());
+//		hc.decryptText();
+//		System.out.println(hc.getOutput());
+		int[][] array = {{221, 5}, {37, 15}};
+		hc.setMatrix(array);
+		hc.saveKey("D:\\test\\hillKey.txt");
 	}
 	 
 }

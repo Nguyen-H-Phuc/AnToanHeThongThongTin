@@ -19,7 +19,7 @@ public class SubstitutionCipherView extends ClassicalCipherView {
 	
 	public SubstitutionCipherView(int row,String charset) {
 		super();
-		createFrame(400, 600, "Shift cipher tool");
+		createFrame(700, 600, "Shift cipher tool");
 		createKeyPanel(row, charset);
 		createPanelTextCipher();
 		
