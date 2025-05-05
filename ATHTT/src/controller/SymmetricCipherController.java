@@ -175,8 +175,10 @@ public class SymmetricCipherController {
 	            // Perform encryption or decryption based on the mode
 	            if (mode.equals("ENCRYPT")) {
 	                this.model.encryptFile(srcFile, destFile, instance, modeCipher); // Encrypt the file
+	                this.view.showDialogMessage("Mã hoá file thành công. File được lưu tại: " + destFile, "INFO");
 	            } else {
 	                this.model.decryptFile(srcFile, destFile, instance, modeCipher); // Decrypt the file
+	                this.view.showDialogMessage("Giải mã file thành công. File được lưu tại: " + destFile, "INFO");
 	            }
 	        // Handle various exceptions and display appropriate error messages
 	        } catch (IllegalArgumentException e) {

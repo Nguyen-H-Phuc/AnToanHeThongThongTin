@@ -58,9 +58,9 @@ public class SubstitutionCipher extends ClasscialCipher {
 
 	        // Check if all expected pairs were saved
 	        if (count == VIETNAMESE_ALPHABET.length()) {
-	            return "Successfully saved key! Number of pairs saved: " + count;
+	            return "Số cặp key lưu được: " + count;
 	        } else {
-	            return "WARNING: Key not fully saved! Only saved " + count + " / " + VIETNAMESE_ALPHABET.length();
+	            return "Số cặp key lưu được" + count + " / " + VIETNAMESE_ALPHABET.length();
 	        }
 	    }
 	}
@@ -95,9 +95,9 @@ public class SubstitutionCipher extends ClasscialCipher {
 
 	        // Check if all expected pairs were successfully loaded
 	        if (count == VIETNAMESE_ALPHABET.length()) {
-	            return "Successfully loaded key! Number of pairs loaded: " + count;
+	            return "Tải khoá thành cồng! Số cặp khoá tải được: " + count;
 	        } else {
-	            return "WARNING: Key not fully loaded! Only loaded " + count + " / " + VIETNAMESE_ALPHABET.length();
+	            return "Không tải đủ số khoá! Chỉ tải được: " + count + " / " + VIETNAMESE_ALPHABET.length();
 	        }
 	    }
 	}

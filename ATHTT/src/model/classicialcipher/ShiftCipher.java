@@ -49,7 +49,7 @@ public class ShiftCipher extends ClasscialCipher {
 		File file = new File(filePath);
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 			writer.write(String.valueOf(key));
-			return "Lưu khoá thành công.";
+			return "Lưu khoá thành công vào file: " + filePath;
 		} catch (IOException e) {
 			return "Lỗi khi ghi key: " + e.getMessage();
 		}

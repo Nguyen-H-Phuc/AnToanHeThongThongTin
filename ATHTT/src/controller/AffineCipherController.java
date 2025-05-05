@@ -104,12 +104,12 @@ public class AffineCipherController {
 
 	// Loads a key from a file
 	public void loadKey() {
-	    String filePath = this.view.showFileDialog("Chọn file", true);
+	    String filePath = this.view.showFileDialog("Chọn file", false);
 	    if (!filePath.isEmpty()) {
 	        String message;
 	        try {
 	            // Load key from file and show a message
-	            message = this.model.loadKey(this.view.showFileDialog("Chọn file", false));
+	            message = this.model.loadKey(filePath);
 	            this.view.showDialogMessage(message, "INFO");
 	            this.view.setValueSpinner1(this.model.getA());
 	            this.view.setValueSpinner2(this.model.getB());

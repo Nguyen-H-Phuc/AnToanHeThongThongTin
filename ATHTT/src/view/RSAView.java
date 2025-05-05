@@ -37,7 +37,8 @@ public class RSAView extends ClassicalCipherView {
 	@Override
 	public void createKeyPanel() {
 		String[] rsaInstance = {"RSA/ECB/PKCS1Padding", "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
-				"RSA/ECB/OAEPWithSHA-256AndMGF1Padding"};
+				"RSA/ECB/OAEPWithSHA-256AndMGF1Padding", "RSA/ECB/ISO9796-1Padding", "RSA/ECB/OAEPWithSHA-256AndMGF1Padding",
+				"RSA/None/OAEPWITHSHA1ANDMGF1PADDING", "RSA/None/OAEPWITHSHA256ANDMGF1PADDING"};
 
 		algorithm = new JComboBox<String>(rsaInstance);
 		algorithm.setSelectedIndex(0);

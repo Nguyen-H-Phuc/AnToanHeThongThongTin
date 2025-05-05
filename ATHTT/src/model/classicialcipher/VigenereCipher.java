@@ -115,7 +115,7 @@ public class VigenereCipher extends ClasscialCipher {
 	public String saveKey(String filePath) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(getKey());
-            return "Lưu khoá thành công";
+            return "Lưu khoá thành công vào file: " + filePath;
         } 
 	}
 	

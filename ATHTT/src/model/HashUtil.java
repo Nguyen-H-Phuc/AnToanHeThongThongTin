@@ -60,7 +60,8 @@ public class HashUtil {
         DigestInputStream dis = new DigestInputStream(is, md); // Wrap input stream with DigestInputStream to calculate hash as data is read
         byte[] buffer = new byte[1024]; // Buffer to hold data while reading the file
         while (dis.read(buffer) != -1); // Read file until the end
-
+        
+        dis.close();
         byte[] digest = md.digest(); // Finalize the hash calculation
 
         // Convert the resulting byte array to a BigInteger and then to a hexadecimal string

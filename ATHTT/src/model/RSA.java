@@ -15,8 +15,10 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -32,22 +34,33 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 
 public class RSA {
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
 	
+	public RSA() {
+		super();
+		Security.addProvider(new BouncyCastleProvider());
+	}
+	
 	// Method to generate a public-private key pair using a specified algorithm and key size
-	public void genKey(String instance, int keySize) throws NoSuchAlgorithmException {
-	    KeyPairGenerator kpg = KeyPairGenerator.getInstance(instance);	    
-	    // Initialize the key generator with the specified key size
+	public void genKey(String instance, int keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
+	    KeyPairGenerator kpg;
+	    try {
+	        kpg = KeyPairGenerator.getInstance(instance);
+	    } catch (NoSuchAlgorithmException e) {
+	        kpg = KeyPairGenerator.getInstance(instance, "BC");
+	    }
 	    kpg.initialize(keySize);
 	    KeyPair kp = kpg.genKeyPair();
-	    
-	    // Assign the public and private keys to the respective variables
 	    publicKey = kp.getPublic();
 	    privateKey = kp.getPrivate();
 	}
+
+
 
 	
 	// Method to save the public key to a file
@@ -116,43 +129,35 @@ public class RSA {
 			throw new RuntimeException(e);
 		}
 	}
-
-	// Method to encrypt data as bytes using a specified encryption instance
-	public byte[] encryptByte(String data, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
-	        InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-	    // Get the Cipher instance for the specified encryption algorithm
-	    Cipher cipher = Cipher.getInstance(instance);
-	    
-	    // Initialize the cipher in encryption mode using the public key
+	
+	public byte[] encryptByte(String data, String instance) 
+	        throws  UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	    Cipher cipher = getCipher(instance);
 	    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-	    
-	    // Encrypt the data and return the result as a byte array
 	    return cipher.doFinal(data.getBytes("UTF-8"));
 	}
 
-	// Method to encrypt data as a Base64-encoded string
-	public String encryptString(String data, String instance) throws InvalidKeyException, NoSuchAlgorithmException,
-	        NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-	    return Base64.getEncoder().encodeToString(encryptByte(data, instance));
-	}
 
+
+	public String encryptString(String data, String instance) throws InvalidKeyException, NoSuchAlgorithmException,
+    NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, NoSuchProviderException {
+		return Base64.getEncoder().encodeToString(encryptByte(data, instance));
+}
 
 	// Method to decrypt byte array data using a specified encryption instance
-	public String decryptByte(byte[] encryptedData, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
-	        InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-	    Cipher cipher = Cipher.getInstance(instance);
-	    cipher.init(Cipher.DECRYPT_MODE, privateKey);
-	    
-	    // Decrypt the byte array
-	    byte[] decryptedBytes = cipher.doFinal(encryptedData);
-	    
-	    // Convert decrypted bytes to UTF-8 string
-	    return new String(decryptedBytes, "UTF-8");
+	public String decryptByte(byte[] encryptedData, String instance)
+			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,
+			BadPaddingException, UnsupportedEncodingException, NoSuchProviderException {
+		Cipher cipher = getCipher(instance);
+		cipher.init(Cipher.DECRYPT_MODE, privateKey);
+		byte[] decryptedBytes = cipher.doFinal(encryptedData);
+		// Convert decrypted bytes
+		return new String(decryptedBytes, "UTF-8");
 	}
 
 	// Method to decrypt a Base64-encoded encrypted string
 	public String decryptString(String encryptedBase64, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
-	        InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, IllegalArgumentException {
+	        InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, IllegalArgumentException, NoSuchProviderException {
 	    // Decode Base64 string to get encrypted bytes
 	    byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
 	    return decryptByte(encryptedBytes, instance);
@@ -160,8 +165,8 @@ public class RSA {
 
 
 	public String encryptSercetKey(SecretKey secretKey, String instance) throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		Cipher cipher = Cipher.getInstance(instance);
+			NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
+		Cipher cipher = getCipher(instance);
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 		// Get raw bytes of the secret key
 		byte[] keyBytes = secretKey.getEncoded();
@@ -237,8 +242,8 @@ public class RSA {
 	}
 
 
-	private SecretKey decryptSercetKey(String encryptedKey, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-	    Cipher cipher = Cipher.getInstance(instance);
+	private SecretKey decryptSercetKey(String encryptedKey, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException {
+	    Cipher cipher = getCipher(instance);
 	    cipher.init(Cipher.DECRYPT_MODE, privateKey);   
 	    // Decode the Base64-encoded encrypted key string to get the raw encrypted bytes
 	    byte[] encryptedKeyBytes = Base64.getDecoder().decode(encryptedKey);
@@ -278,6 +283,18 @@ public class RSA {
 	
 	public void clearPublicKey() {
 		this.publicKey = null;
+	}
+	
+	private Cipher getCipher(String transformation)
+			throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
+		try {
+			// Thử với provider mặc định
+			return Cipher.getInstance(transformation);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			// Fallback sang Bouncy Castle
+			return Cipher.getInstance(transformation, "BC");
+
+		}
 	}
 
 }

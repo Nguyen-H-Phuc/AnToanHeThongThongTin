@@ -82,7 +82,7 @@ public class PermutationCipherView extends ClassicalCipherView {
 	}
 	
 	private JScrollPane createTabel(int row) {
-	    String[] columnNames = {"Index", "Value"};
+	    String[] columnNames = {"Vị trí gốc", "Hoán vị"};
 	    Object[][] data = new Object[row][2];
 
 	    for (int i = 0; i < row; i++) {

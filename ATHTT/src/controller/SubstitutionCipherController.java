@@ -71,8 +71,8 @@ public class SubstitutionCipherController {
 		String filePath = this.view.showFileDialog("Chọn file", false);
 		if (!filePath.isEmpty()) {
 			try {
-				this.view.updateTableValues(this.model.getEncryptionMap());
 				this.view.showDialogMessage(this.model.loadSubstitutionTable(filePath), "INFO");
+				this.view.updateTableValues(this.model.getEncryptionMap());
 			} // Handle exception
 			catch (FileNotFoundException e) {
 				this.view.showDialogMessage("Không tìm thấy file: " + filePath, "ERROR");
@@ -104,30 +104,38 @@ public class SubstitutionCipherController {
 			decision = this.view.showYesNoDialog(
 					"Có kí tự thay thế bị trùng. Việc giải mã có thể bị lỗi hoặc không giải mã được. Bạn có muốn tiếp tục?",
 					"WARN");
-			if (decision == JOptionPane.YES_OPTION) {
-				if (this.model.getEncryptionMap().isEmpty()) {
-					this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
-				} else {
-					this.model.setInput(view.getInputText());
-					this.model.encryptText();
-					if (this.model.getOutput().equals("ERROR")) {
-						// Do nothing if error (silent fail)
-					} else {
-						view.setOutputText(this.model.getOutput());
-					}
-				}
+		}
+		if (decision == JOptionPane.YES_OPTION) {
+			if (this.model.getEncryptionMap().isEmpty()) {
+				this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
+			} else {
+				this.model.setInput(view.getInputText());
+				this.model.encryptText();
+				this.view.setOutputText(this.model.getOutput());
+				System.out.println(this.model.getOutput());
 			}
 		}
 	}
+		
 
 	private void handleDecrypt() {
 		this.model.setEncryptionMap(this.view.getTableValues());
-		if (this.model.getDecryptionMap().isEmpty()) {
-			this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
-		} else {
-			this.model.setInput(view.getInputText());
-			this.model.decryptText();
-			view.setOutputText(this.model.getOutput());
+		int decision = JOptionPane.YES_OPTION;
+
+		// Check for duplicate values before decrypting
+		if (this.model.hasDuplicateValues()) {
+			decision = this.view.showYesNoDialog(
+					"Có kí tự thay thế bị trùng. Việc giải mã có thể bị lỗi hoặc không giải mã được. Bạn có muốn tiếp tục?",
+					"WARN");
+		}
+		if (decision == JOptionPane.YES_OPTION) {
+			if (this.model.getDecryptionMap().isEmpty()) {
+				this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
+			} else {
+				this.model.setInput(view.getInputText());
+				this.model.decryptText();
+				view.setOutputText(this.model.getOutput());
+			}
 		}
 	}
 }

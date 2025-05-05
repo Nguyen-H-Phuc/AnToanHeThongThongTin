@@ -89,12 +89,11 @@ public class HillCipher extends ClasscialCipher {
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 	        for (int i = 0; i < matrix.length; i++) {
 	            for (int j = 0; j < matrix[i].length; j++) {
-	            	System.out.println(matrix[i][j]);
 	                writer.write(matrix[i][j] + " ");
 	            }
 	            writer.newLine();
 	        }
-	        return "Đã lưu thành công";
+	        return "Đã lưu thành công khoá vào file: " + filePath;
 	    } 
 	}
 	

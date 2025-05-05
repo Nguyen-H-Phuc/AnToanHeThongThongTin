@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.BadPaddingException;
@@ -29,11 +30,12 @@ public class RSAController {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				String instance = view.getAlgorithm().substring(0, 3);
 				try {
 					int keySize = view.getKeySize();
-					model.genKey(view.getAlgorithm().substring(0, 3), keySize);
-				} catch (NoSuchAlgorithmException e1) {
-					e1.printStackTrace();
+					model.genKey(instance, keySize);
+				} catch (NoSuchAlgorithmException | NoSuchProviderException e1 ) {
+					view.showDialogMessage("Không hỗ trợ tạo khoá với " + instance, "ERROR");
 				}
 				view.setPublicKey(model.getPublicKey());
 				view.setPrivateKey(model.getPrivateKey());
@@ -176,7 +178,9 @@ public class RSAController {
 	        // Set the output text in the view
 	        this.view.setOutputText(output);
 	    } //handle error 
-	    catch (InvalidKeyException e) {
+	     catch (NoSuchProviderException e) {
+			this.view.showDialogMessage("Không hỗ trợ thuật toán:" +algorithm , "ERROR");
+		} catch (InvalidKeyException e) {
 	        // Handle error if key is invalid (from setKey())
 	        this.view.setOutputText(""); 
 	    } catch (NoSuchAlgorithmException e) {
