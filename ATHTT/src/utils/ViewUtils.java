@@ -58,4 +58,15 @@ public class ViewUtils {
 			}
 		});
 	}
+	
+	public static void setSaveFilePath(Frame frame, JButton button, JTextField textField) {
+		button.addActionListener(e -> {
+			FileDialog fileDialog = new FileDialog((Frame) null, "Chọn file", FileDialog.SAVE);
+			fileDialog.setVisible(true);
+			if (fileDialog.getFile() != null) {
+				String selectedFile = fileDialog.getDirectory() + fileDialog.getFile();
+				textField.setText(selectedFile);
+			}
+		});
+	}
 }

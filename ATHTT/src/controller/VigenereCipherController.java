@@ -60,49 +60,57 @@ public class VigenereCipherController {
 	}
 	
 	private void handleText(String mode) {
-		String key = view.getKey();
-		this.model.setKey(key);
-		this.model.setInput(this.view.getInputText());
-		if(mode.equals("ENCRYPT")) {
-		this.model.encryptText();}
-		else {this.model.decryptText();}
-		this.view.setOutputText(this.model.getOutput());
-	}	
-	
+	    String key = view.getKey();
+	    if(key==null || key.trim().isEmpty())
+	    {
+	    	this.view.showDialogMessage("Bạn chưa nhập khoá. Vui lòng nhập khoá để tiếp tục.", "ERROR");
+	    	return;
+	    }
+	    this.model.setKey(key);
+	    this.model.setInput(this.view.getInputText());
+	    if (mode.equals("ENCRYPT")) {
+	        this.model.encryptText();
+	    } else {
+	        this.model.decryptText();
+	    }
+	    this.view.setOutputText(this.model.getOutput());
+	}
+
 	private void genKey() {
-		int keyLength = view.getValueSpinner();
-		this.model.setKeyLength(keyLength);
-		this.model.genKey();
-		this.view.setKey(model.getKey());
+	    // Generate a key of specified length and update view
+	    int keyLength = view.getValueSpinner();
+	    this.model.setKeyLength(keyLength);
+	    this.model.genKey();
+	    this.view.setKey(model.getKey());
 	}
-	
-	
-	
+
 	private void loadKey() {
-		String filePath = view.showFileDialog("Chọn file", false);
-		if (!filePath.isEmpty()) {
-			try {
-				this.view.showDialogMessage(model.loadKey(filePath), "INFO");
-				this.view.setKey(this.model.getKey());
-			} catch (FileNotFoundException e) {
-				this.view.showDialogMessage("Không tìm thấy file", "ERROR");
-			} catch (IOException e) {
-				this.view.showDialogMessage("Lỗi khi tải khoá: " + e.getMessage(), "ERROR");
-			}
-			
-		}
+	    String filePath = view.showFileDialog("Chọn file", false);
+	    if (!filePath.isEmpty()) {
+	        try {
+	            this.view.showDialogMessage(model.loadKey(filePath), "INFO");
+	            this.view.setKey(this.model.getKey());
+	        } // Handle exception
+	        catch (FileNotFoundException e) { 
+	            this.view.showDialogMessage("Không tìm thấy file", "ERROR");
+	        } catch (IOException e) {
+	            this.view.showDialogMessage("Lỗi khi tải khoá: " + e.getMessage(), "ERROR");
+	        }
+	    }
 	}
-	
+
 	private void saveKey() {
-		this.model.setKey(this.view.getKey());
-		String filePath = view.showFileDialog("Chọn file", true);
-		if (!filePath.isEmpty()) {
-			try {
-				this.view.showDialogMessage(model.saveKey(filePath), "INFO");
-			} catch (IOException e) {
-				this.view.showDialogMessage("Lỗi khi ghi khoá" + e.getMessage(), "ERROR");
-			}
-		}
+	    this.model.setKey(this.view.getKey());
+	    String filePath = view.showFileDialog("Chọn file", true);
+	    if (!filePath.isEmpty()) {
+	        try {
+	            this.view.showDialogMessage(model.saveKey(filePath), "INFO");
+	        } catch (IOException e) {
+	            // Handle exception
+	            this.view.showDialogMessage("Lỗi khi ghi khoá" + e.getMessage(), "ERROR");
+	        }
+	    }
 	}
+
 	
 }

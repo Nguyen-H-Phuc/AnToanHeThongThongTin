@@ -59,40 +59,47 @@ public class ShiftCipherConttroler {
 	}
 	
 	private void handleText(String mode) {
-		int shift = view.getValueSpinner();
-		this.model.setInput(this.view.getInputText());
-		if(mode.equals("ENCRYPT")) {
-		this.model.encryptText(shift);}
-		else {this.model.decryptText(shift);}
-		this.view.setOutputText(this.model.getOutput());
-	}
-	
-	private void genKey() {
-		int shift = this.model.genKey();
-		this.view.setValueSpinner(shift);
-	}
-		
-	private void saveKey() {
-		String filePath = view.showFileDialog("Chọn file", true);
-		if (!filePath.isEmpty()) {
-			this.view.showDialogMessage(model.saveKey(filePath, this.view.getValueSpinner()), "INFO");
-		}
+	    int shift = view.getValueSpinner();
+	    this.model.setInput(this.view.getInputText());
 
+	    // Perform encryption or decryption based on mode
+	    if (mode.equals("ENCRYPT")) {
+	        this.model.encryptText(shift);
+	    } else {
+	        this.model.decryptText(shift);
+	    }
+
+	    this.view.setOutputText(this.model.getOutput());
 	}
-	
+
+	private void genKey() {
+	    // Generate shift key and set in view
+	    int shift = this.model.genKey();
+	    this.view.setValueSpinner(shift);
+	}
+
+	private void saveKey() {
+	    String filePath = view.showFileDialog("Chọn file", true);
+	    if (!filePath.isEmpty()) {
+	        this.view.showDialogMessage(model.saveKey(filePath, this.view.getValueSpinner()), "INFO");
+	    }
+	}
+
 	private void loadKey() {
-		String filePath = view.showFileDialog("Chọn file", false);
-		if (!filePath.isEmpty()) {
-			try {
-				int shift = this.model.loadKey(filePath);
-				this.view.setValueSpinner(shift);
-				this.view.showDialogMessage("Tải khoá thành công", "INFO");
-			} catch (NumberFormatException e) {
-				this.view.showDialogMessage("Khoá bị lỗi: Khoá phải là số nguyên", "ERROR");
-			} catch (IOException e) {
-				this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");
-			}
-		}
+	    String filePath = view.showFileDialog("Chọn file", false);
+	    if (!filePath.isEmpty()) {
+	        try {
+	            int shift = this.model.loadKey(filePath);
+	            this.view.setValueSpinner(shift);
+	            this.view.showDialogMessage("Tải khoá thành công", "INFO");
+	        }// Handle exception 
+	        catch (NumberFormatException e) {
+	            this.view.showDialogMessage("Khoá bị lỗi: Khoá phải là số nguyên", "ERROR");
+	        } catch (IOException e) {
+	            this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");
+	        }
+	    }
 	}
+
 
 }

@@ -63,55 +63,63 @@ public class PermutationCipherController {
 	}
 
 	private void handleText(String mode) {
-		int[] permutationTable = this.view.getTableValues();
-		this.model.setInput(this.view.getInputText());
-		if (this.model.hasValueGreaterThanIndex(permutationTable)) {
-			this.view.showDialogMessage("Bảng hoán vị không hợp lệ. Không thể tiếp tục.", "ERROR");
-			return;
-		}
-		int decision = JOptionPane.YES_NO_OPTION;
-		if (this.model.hasDuplicates(permutationTable)) {
-			decision = this.view.showYesNoDialog(
-					"Phát hiện vị trí hoán vị trùng nhau. Việc giải mã có thể bị lỗi hoặc không giải mã được. Bạn có muốn tiếp tục?",
-					"WARN");
-		}
-		if (decision == JOptionPane.YES_OPTION) {
+	    int[] permutationTable = this.view.getTableValues();
+	    this.model.setInput(this.view.getInputText());
 
-			if (mode.equals("ENCRYPT")) {
-				this.model.encryptText(permutationTable);
-			} else {
-				this.model.decryptText(permutationTable);
-			}
-			this.view.setOutputText(this.model.getOutput());
-		}
+	    // Check if any value exceeds its allowed index
+	    if (this.model.hasValueGreaterThanIndex(permutationTable)) {
+	        this.view.showDialogMessage("Bảng hoán vị không hợp lệ. Không thể tiếp tục.", "ERROR");
+	        return;
+	    }
+
+	    int decision = JOptionPane.YES_NO_OPTION;
+
+	    // Check for duplicate positions in permutation table
+	    if (this.model.hasDuplicates(permutationTable)) {
+	        decision = this.view.showYesNoDialog(
+	                "Phát hiện vị trí hoán vị trùng nhau. Việc giải mã có thể bị lỗi hoặc không giải mã được. Bạn có muốn tiếp tục?",
+	                "WARN");
+	    }
+
+	    if (decision == JOptionPane.YES_OPTION) {
+	        // Perform encryption or decryption
+	        if (mode.equals("ENCRYPT")) {
+	            this.model.encryptText(permutationTable);
+	        } else {
+	            this.model.decryptText(permutationTable);
+	        }
+	        this.view.setOutputText(this.model.getOutput());
+	    }
 	}
 
 	private void genKey() {
-		int keyLength = this.view.getValueSpinner();
+	    int keyLength = this.view.getValueSpinner();
 
-		int[] permutationTable = this.model.genKey(keyLength);
-		this.view.updateTableValues(permutationTable);
+	    // Generate permutation key and update view
+	    int[] permutationTable = this.model.genKey(keyLength);
+	    this.view.updateTableValues(permutationTable);
 	}
 
 	private void loadKey() {
-		String filePath = this.view.showFileDialog("Chọn file", false);
-		if (!filePath.isEmpty()) {
-			int[] permutationTable = this.model.getPermutationTable();
-			String result;
-			try {
-				result = this.model.loadKey(filePath);
-				this.view.showDialogMessage(result, "Info");
-				this.view.updateTableValues(permutationTable);
-			} catch (NumberFormatException e) {
-				this.view.showDialogMessage("Khoá bị lỗi.", "ERROR");
-			} catch (FileNotFoundException e) {
-				this.view.showDialogMessage("Không tìm thấy file:" + filePath, "ERROR");
-			} catch (IOException e) {
-				this.view.showDialogMessage("Lỗi không xác định: " + e.getMessage(), "ERROR");
-			}
-		}
+	    String filePath = this.view.showFileDialog("Chọn file", false);
+	    if (!filePath.isEmpty()) {
+	        int[] permutationTable = this.model.getPermutationTable();
+	        String result;
+	        try {
+	            result = this.model.loadKey(filePath);
+	            this.view.showDialogMessage(result, "Info");
+	            this.view.updateTableValues(permutationTable);
+	        }// Handle exception 
+	          catch (NumberFormatException e) {
+	            this.view.showDialogMessage("Khoá bị lỗi.", "ERROR");
+	        } catch (FileNotFoundException e) {
+	            this.view.showDialogMessage("Không tìm thấy file:" + filePath, "ERROR");
+	        } catch (IOException e) {
+	            this.view.showDialogMessage("Lỗi không xác định: " + e.getMessage(), "ERROR");
+	        }
+	    }
 	}
-	
+
 	public void saveKey() {
 		String filePath = this.view.showFileDialog("Chọn file", true);
 		if (!filePath.isEmpty()) {
@@ -120,11 +128,13 @@ public class PermutationCipherController {
 			try {
 				String result = this.model.saveKey(filePath);
 				this.view.showDialogMessage(result, "INFO");
-			} catch (IOException e) {
+			} // Handle exception
+			catch (IOException e) {
 				this.view.showDialogMessage("Lỗi khi lưu khoá: " + e.getMessage(), "ERROR");
 			}
 		}
 	}
+
 
 	public static void main(String[] args) {
 		new PermutationCipherController(new PermutationCipher(), new PermutationCipherView());

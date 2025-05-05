@@ -2,7 +2,6 @@ package model;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -38,51 +37,75 @@ public class RSA {
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
 	
+	// Method to generate a public-private key pair using a specified algorithm and key size
 	public void genKey(String instance, int keySize) throws NoSuchAlgorithmException {
-			KeyPairGenerator kpg = KeyPairGenerator.getInstance(instance);
-			kpg.initialize(keySize);
-			KeyPair kp = kpg.genKeyPair();
-			publicKey = kp.getPublic();
-			privateKey = kp.getPrivate();
+	    KeyPairGenerator kpg = KeyPairGenerator.getInstance(instance);	    
+	    // Initialize the key generator with the specified key size
+	    kpg.initialize(keySize);
+	    KeyPair kp = kpg.genKeyPair();
+	    
+	    // Assign the public and private keys to the respective variables
+	    publicKey = kp.getPublic();
+	    privateKey = kp.getPrivate();
 	}
+
 	
+	// Method to save the public key to a file
 	public String savePublicKey(String publicKey, String filePath) throws IOException {
-		FileWriter writer = new FileWriter(filePath);
-		writer.write("-----BEGIN PUBLIC KEY-----\n");
-		writer.write(publicKey);
-		writer.write("\n-----END PUBLIC KEY-----\n");
-		writer.close();
-		return "Lưu khoá công khai thành công " + "\n" + "Khoá công khai được lưu tại: " + filePath;
+	    FileWriter writer = new FileWriter(filePath);
+	    
+	    // Write the public key in the PEM format
+	    writer.write("-----BEGIN PUBLIC KEY-----\n");
+	    writer.write(publicKey);
+	    writer.write("\n-----END PUBLIC KEY-----\n");
+	    
+	    writer.close();
+	    
+	    return "Lưu khoá công khai thành công " + "\n" + "Khoá công khai được lưu tại: " + filePath;
 	}
-	
+
+	// Method to save the private key to a file
 	public String savePrivateKey(String privateKey, String filePath) throws IOException {
-		FileWriter writer = new FileWriter(filePath);
-		writer.write("-----BEGIN PRIVATE KEY-----\n");
-		writer.write(privateKey);
-		writer.write("\n-----END PRIVATE KEY-----\n");
-		writer.close();
-		return "Lưu khoá riêng tư thành công " + "\n" + "Khoá riêng tư được lưu tại: " + filePath;
+	    FileWriter writer = new FileWriter(filePath);
+	    
+	    // Write the private key in the PEM format
+	    writer.write("-----BEGIN PRIVATE KEY-----\n");
+	    writer.write(privateKey);
+	    writer.write("\n-----END PRIVATE KEY-----\n");
+	    
+	    writer.close();
+	    
+	    return "Lưu khoá riêng tư thành công " + "\n" + "Khoá riêng tư được lưu tại: " + filePath;
 	}
-	
+
+	// Method to load the public key from a file and remove unnecessary parts
 	public void loadPublicKey(String filePath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 	    String content = Files.readString(Paths.get(filePath));
+	    
+	    // Clean up the key content by removing the PEM header, footer, and whitespaces
 	    String keyBase64 = content
 	        .replace("-----BEGIN PUBLIC KEY-----", "")
 	        .replace("-----END PUBLIC KEY-----", "")
 	        .replaceAll("\\s", "");
-
+	    
+	    // Set the public key using the cleaned base64 string
 	    setPublicKey(keyBase64);
 	}
-	
-	public void loadPrivateKey(String filePath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException  {
+
+	// Method to load the private key from a file and remove unnecessary parts
+	public void loadPrivateKey(String filePath) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 	    String content = Files.readString(Paths.get(filePath));
+	    
+	    // Clean up the key content by removing the PEM header, footer, and whitespaces
 	    String keyBase64 = content
 	        .replace("-----BEGIN PRIVATE KEY-----", "")
 	        .replace("-----END PRIVATE KEY-----", "")
 	        .replaceAll("\\s", "");
-
+	    
+	    // Set the private key using the cleaned base64 string
 	    setPrivateKey(keyBase64);
 	}
+
 
 	public SecretKey genSecretKey(String instance, int keySize) {
 		try {
@@ -94,58 +117,81 @@ public class RSA {
 		}
 	}
 
+	// Method to encrypt data as bytes using a specified encryption instance
 	public byte[] encryptByte(String data, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-		Cipher cipher = Cipher.getInstance(instance);
-		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-		return cipher.doFinal(data.getBytes("UTF-8"));
+	        InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+	    // Get the Cipher instance for the specified encryption algorithm
+	    Cipher cipher = Cipher.getInstance(instance);
+	    
+	    // Initialize the cipher in encryption mode using the public key
+	    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+	    
+	    // Encrypt the data and return the result as a byte array
+	    return cipher.doFinal(data.getBytes("UTF-8"));
 	}
 
+	// Method to encrypt data as a Base64-encoded string
 	public String encryptString(String data, String instance) throws InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-		return Base64.getEncoder().encodeToString(encryptByte(data, instance));
+	        NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+	    return Base64.getEncoder().encodeToString(encryptByte(data, instance));
 	}
 
+
+	// Method to decrypt byte array data using a specified encryption instance
 	public String decryptByte(byte[] encryptedData, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-		Cipher cipher = Cipher.getInstance(instance);
-		cipher.init(Cipher.DECRYPT_MODE, privateKey);
-		byte[] decryptedBytes = cipher.doFinal(encryptedData);
-		return new String(decryptedBytes, "UTF-8");
+	        InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+	    Cipher cipher = Cipher.getInstance(instance);
+	    cipher.init(Cipher.DECRYPT_MODE, privateKey);
+	    
+	    // Decrypt the byte array
+	    byte[] decryptedBytes = cipher.doFinal(encryptedData);
+	    
+	    // Convert decrypted bytes to UTF-8 string
+	    return new String(decryptedBytes, "UTF-8");
 	}
 
+	// Method to decrypt a Base64-encoded encrypted string
 	public String decryptString(String encryptedBase64, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, IllegalArgumentException {
-		byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
-		return decryptByte(encryptedBytes, instance);
+	        InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, IllegalArgumentException {
+	    // Decode Base64 string to get encrypted bytes
+	    byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
+	    return decryptByte(encryptedBytes, instance);
 	}
 
-	public String encryptSercetKey(SecretKey secretKey, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			IllegalBlockSizeException, BadPaddingException {
+
+	public String encryptSercetKey(SecretKey secretKey, String instance) throws NoSuchAlgorithmException,
+			NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher cipher = Cipher.getInstance(instance);
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+		// Get raw bytes of the secret key
 		byte[] keyBytes = secretKey.getEncoded();
+		// Encrypt the secret key bytes
 		byte[] encryptedKey = cipher.doFinal(keyBytes);
+		// Encode the encrypted key as a Base64 string
 		String encryptKey = Base64.getEncoder().encodeToString(encryptedKey);
 		return encryptKey;
 	}
+
 	
 	public void encryptFile(String srcFile, String destFile, String instance) throws Exception {
 	    FileOutputStream fos = new FileOutputStream(destFile);
 	    DataOutputStream dos = new DataOutputStream(fos);
 	    
-	    // Ghi key
+	    // Generate a secret AES key and encrypt it using the given instance
 	    SecretKey secretKey = genSecretKey("AES", 128);
 	    String encryptedKey = encryptSercetKey(secretKey, instance);
 	    byte[] encryptedKeyBytes = encryptedKey.getBytes(StandardCharsets.UTF_8);
-	    dos.writeInt(encryptedKeyBytes.length); // ghi độ dài key
-	    dos.write(encryptedKeyBytes); // ghi key
 	    
-	    // Ghi dữ liệu file đã mã hóa AES
+	    // Write the length and content of the encrypted secret key to the output file
+	    dos.writeInt(encryptedKeyBytes.length); 
+	    dos.write(encryptedKeyBytes); 
+	    
+	    // Set up AES cipher for encryption
 	    Cipher cipher = Cipher.getInstance("AES");
 	    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-	    CipherOutputStream cos = new CipherOutputStream(fos, cipher); // dùng lại fos, không dùng dos nữa
+	    CipherOutputStream cos = new CipherOutputStream(fos, cipher); 
 	    
+	    // Read the source file and write encrypted data to the destination file
 	    FileInputStream fis = new FileInputStream(srcFile);
 	    byte[] buffer = new byte[1024];
 	    int bytesRead;
@@ -154,27 +200,34 @@ public class RSA {
 	    }
 
 	    fis.close();
-	    cos.close(); // tự đóng fos
+	    cos.close();
 	}
+
 
 	public void decryptFile(String srcFile, String destFile, String instance) throws Exception {
 	    FileInputStream fis = new FileInputStream(srcFile);
 	    DataInputStream dis = new DataInputStream(fis);
 
-	    // Đọc độ dài và key
+	    // Read the length of the encrypted key and the encrypted key bytes
 	    int keyLength = dis.readInt();
 	    byte[] encryptedKeyBytes = new byte[keyLength];
 	    dis.readFully(encryptedKeyBytes);
 	    String encryptedKey = new String(encryptedKeyBytes, StandardCharsets.UTF_8);
 
+	    // Decrypt the secret key using the given instance
 	    SecretKey originalKey = decryptSercetKey(encryptedKey, instance);
+
+	    // Set up AES cipher for decryption
 	    Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 	    cipher.init(Cipher.DECRYPT_MODE, originalKey);
 
+	    // Create CipherInputStream to read and decrypt the file content
 	    CipherInputStream cis = new CipherInputStream(fis, cipher);
 	    FileOutputStream fos = new FileOutputStream(destFile);
 	    byte[] buffer = new byte[1024];
 	    int bytesRead;
+	    
+	    // Write decrypted data to the destination file
 	    while ((bytesRead = cis.read(buffer)) != -1) {
 	        fos.write(buffer, 0, bytesRead);
 	    }
@@ -183,13 +236,17 @@ public class RSA {
 	    fos.close();
 	}
 
+
 	private SecretKey decryptSercetKey(String encryptedKey, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		Cipher cipher = Cipher.getInstance(instance);
-		cipher.init(Cipher.DECRYPT_MODE, privateKey);
-		byte[] encryptedKeyBytes = Base64.getDecoder().decode(encryptedKey);
-		byte[] decryptedKeyBytes = cipher.doFinal(encryptedKeyBytes);
-		SecretKey originalKey = new SecretKeySpec(decryptedKeyBytes, "AES");
-		return originalKey;
+	    Cipher cipher = Cipher.getInstance(instance);
+	    cipher.init(Cipher.DECRYPT_MODE, privateKey);   
+	    // Decode the Base64-encoded encrypted key string to get the raw encrypted bytes
+	    byte[] encryptedKeyBytes = Base64.getDecoder().decode(encryptedKey);
+	    // Decrypt the key bytes
+	    byte[] decryptedKeyBytes = cipher.doFinal(encryptedKeyBytes);
+	    // Create a SecretKey object from the decrypted bytes using AES
+	    SecretKey originalKey = new SecretKeySpec(decryptedKeyBytes, "AES");
+	    return originalKey;
 	}
 
 	public String getPublicKey() {

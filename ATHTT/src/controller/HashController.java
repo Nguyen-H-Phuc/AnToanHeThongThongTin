@@ -96,25 +96,13 @@ public class HashController {
 		});
 	}
 	
-	/**
-	 * Clears the content on the user interface based on the specified panel type.
-	 * 
-	 * If the panel is "TEXT", the method clears both the input and output text fields.
-	 * If the panel is any other value, it clears the source file path and the output file path.
-	 *
-	 * @param panel The type of panel to clear ("TEXT" to clear text content, other values to clear file paths)
-	 */
 	private void clear(String panel) {
 		if(panel.equals("TEXT")) {
 			view.setInputText("");
 			view.setOutputText("");
 		} else {view.setOutputFile("");
 		view.setSrcFilePath("");
-		}
-		
+		}	
 	}
-
-	public static void main(String[] args) {
-		new HashController();
-	}
+	
 }

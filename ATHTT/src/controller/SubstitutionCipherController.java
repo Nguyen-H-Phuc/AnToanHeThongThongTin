@@ -62,32 +62,35 @@ public class SubstitutionCipherController {
 	}
 
 	private void genKey() {
+		// Generate substitution table and update view
 		this.model.generateSubstitutionTable();
 		this.view.updateTableValues(this.model.getEncryptionMap());
 	}
-	
+
 	private void loadKey() {
-		String filePath= this.view.showFileDialog("Chọn file", false);
-		if(!filePath.isEmpty()) {
-		try {
-			this.view.updateTableValues(this.model.getEncryptionMap());
-			this.view.showDialogMessage(this.model.loadSubstitutionTable(filePath),"INFO");
-		} catch (FileNotFoundException e) {
-			this.view.showDialogMessage("Không tìm thấy file: " +filePath, "ERROR");
-		} catch (IOException e) {
-			this.view.showDialogMessage("Lỗi khi đọc file: " +e.getMessage(), "ERROR");
-		}
+		String filePath = this.view.showFileDialog("Chọn file", false);
+		if (!filePath.isEmpty()) {
+			try {
+				this.view.updateTableValues(this.model.getEncryptionMap());
+				this.view.showDialogMessage(this.model.loadSubstitutionTable(filePath), "INFO");
+			} // Handle exception
+			catch (FileNotFoundException e) {
+				this.view.showDialogMessage("Không tìm thấy file: " + filePath, "ERROR");
+			} catch (IOException e) {
+				this.view.showDialogMessage("Lỗi khi đọc file: " + e.getMessage(), "ERROR");
+			}
 		}
 	}
-	
+
 	private void saveKey() {
-		String filePath= this.view.showFileDialog("Chọn file", true);
-		if(!filePath.isEmpty()) {
+		String filePath = this.view.showFileDialog("Chọn file", true);
+		if (!filePath.isEmpty()) {
 			try {
 				this.model.setEncryptionMap(this.view.getTableValues());
-				this.view.showDialogMessage(this.model.saveSubstitutionTable(filePath),"INFO");
+				this.view.showDialogMessage(this.model.saveSubstitutionTable(filePath), "INFO");
 			} catch (IOException e) {
-				this.view.showDialogMessage("Lỗi khi lưu: " +e.getMessage(), "ERROR");
+				// Handle exception
+				this.view.showDialogMessage("Lỗi khi lưu: " + e.getMessage(), "ERROR");
 			}
 		}
 	}
@@ -95,6 +98,8 @@ public class SubstitutionCipherController {
 	private void handleEncrypt() {
 		this.model.setEncryptionMap(this.view.getTableValues());
 		int decision = JOptionPane.YES_OPTION;
+
+		// Check for duplicate values before encrypting
 		if (this.model.hasDuplicateValues()) {
 			decision = this.view.showYesNoDialog(
 					"Có kí tự thay thế bị trùng. Việc giải mã có thể bị lỗi hoặc không giải mã được. Bạn có muốn tiếp tục?",
@@ -106,6 +111,7 @@ public class SubstitutionCipherController {
 					this.model.setInput(view.getInputText());
 					this.model.encryptText();
 					if (this.model.getOutput().equals("ERROR")) {
+						// Do nothing if error (silent fail)
 					} else {
 						view.setOutputText(this.model.getOutput());
 					}
@@ -116,14 +122,12 @@ public class SubstitutionCipherController {
 
 	private void handleDecrypt() {
 		this.model.setEncryptionMap(this.view.getTableValues());
-		if(this.model.getDecryptionMap().isEmpty()) {
+		if (this.model.getDecryptionMap().isEmpty()) {
 			this.view.showDialogMessage("Khoá chưa được tạo!", "ERROR");
 		} else {
-		this.model.setInput(view.getInputText());
-		this.model.decryptText();
-		view.setOutputText(this.model.getOutput());
+			this.model.setInput(view.getInputText());
+			this.model.decryptText();
+			view.setOutputText(this.model.getOutput());
 		}
 	}
-
-
 }

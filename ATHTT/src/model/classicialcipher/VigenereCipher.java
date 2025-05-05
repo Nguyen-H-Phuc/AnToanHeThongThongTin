@@ -12,87 +12,110 @@ public class VigenereCipher extends ClasscialCipher {
 	private int keyLength;
 	private String key;
 
+	// Encrypts the input text 
 	public void encryptText() {
-		StringBuilder result = new StringBuilder();
-		int positionKey = 0;
-		for (int i = 0; i < this.getInput().length(); i++) {
-			char c = this.getInput().charAt(i);
-			if (Character.isLetter(c)) {
-				char k = key.charAt(positionKey);
-				int shift = VIETNAMESE_ALPHABET.indexOf(k);
-				if (shift == -1) {
-					positionKey = (positionKey + 1) % key.length();
-				} 
-					int charPosition = VIETNAMESE_ALPHABET.indexOf(c);
-					char encrypted = VIETNAMESE_ALPHABET
-							.charAt(((charPosition + shift) % VIETNAMESE_ALPHABET.length()));
-					result.append(encrypted);
-					positionKey = (positionKey + 1) % key.length();
-				
-			} else {
-				result.append(c);
-			}
-		}
-		this.setOutput(result.toString());
+	    StringBuilder result = new StringBuilder();
+	    int positionKey = 0;
+	    
+	    for (int i = 0; i < this.getInput().length(); i++) {
+	        char c = this.getInput().charAt(i);
+	        
+	        if (Character.isLetter(c)) {
+	            char k = key.charAt(positionKey);
+	            int shift = VIETNAMESE_ALPHABET.indexOf(k);
+	            
+	            if (shift == -1) {
+	                // skip invalid key character
+	                positionKey = (positionKey + 1) % key.length();
+	            }
+	            
+	            int charPosition = VIETNAMESE_ALPHABET.indexOf(c);
+	            char encrypted = VIETNAMESE_ALPHABET
+	                    .charAt(((charPosition + shift) % VIETNAMESE_ALPHABET.length()));
+	            result.append(encrypted);
+	            
+	            // move to next key character
+	            positionKey = (positionKey + 1) % key.length();
+	        } else {
+	            // Keep non-letter characters as is
+	            result.append(c);
+	        }
+	    }
+	    
+	    this.setOutput(result.toString());
 	}
 
+
+	// decrypts the input text 
 	public void decryptText() {
-		StringBuilder result = new StringBuilder();
-		int positionKey = 0;
-		for (int i = 0; i < this.getInput().length(); i++) {
-			char c = this.getInput().charAt(i);
-			if (Character.isLetter(c)) {
-				char k = key.charAt(positionKey);
-				int shift = VIETNAMESE_ALPHABET.indexOf(k);
-				if (shift == -1) {
-					positionKey = (positionKey + 1) % key.length();
-				}
-				
-				int charPosition = VIETNAMESE_ALPHABET.indexOf(c);
-				char encrypted = VIETNAMESE_ALPHABET
-						.charAt(((charPosition - shift + VIETNAMESE_ALPHABET.length()) % VIETNAMESE_ALPHABET.length()));
-				result.append(encrypted);
-				positionKey = (positionKey + 1) % key.length();
-				
-			} else {
-				result.append(c);
-			}
-		}
-		this.setOutput(result.toString());
+	    StringBuilder result = new StringBuilder();
+	    int positionKey = 0;
+	    
+	    for (int i = 0; i < this.getInput().length(); i++) {
+	        char c = this.getInput().charAt(i);
+	        
+	        if (Character.isLetter(c)) {
+	            char k = key.charAt(positionKey);
+	            int shift = VIETNAMESE_ALPHABET.indexOf(k);
+	            
+	            if (shift == -1) {
+	                // skip invalid key character
+	                positionKey = (positionKey + 1) % key.length();
+	            }
+	            
+	            int charPosition = VIETNAMESE_ALPHABET.indexOf(c);
+	            // calculate decrypted character
+	            char encrypted = VIETNAMESE_ALPHABET.charAt(
+	                ((charPosition - shift + VIETNAMESE_ALPHABET.length()) % VIETNAMESE_ALPHABET.length()));
+	            result.append(encrypted);
+	            
+	            // Move to next key character
+	            positionKey = (positionKey + 1) % key.length();
+	        } else {
+	            // keep non-letter characters as is
+	            result.append(c);
+	        }
+	    }
+	    
+	    this.setOutput(result.toString());
 	}
 
-	public String genKey() {
-		StringBuilder key = new StringBuilder();
-		Random random = new Random();
-		for (int i = 0; i < keyLength; i++) {
-			int index = random.nextInt(VIETNAMESE_ALPHABET.length());
-			key.append(VIETNAMESE_ALPHABET.charAt(index));
-		}
-		setKey(key.toString());
-		if (this.key.length() == this.keyLength) {
-			return "SUCCESS";
-		}
-		else {
-			return "FAIL";
-		}
+
+	// Generates a random key from the Vietnamese alphabet
+	public void genKey() {
+	    StringBuilder key = new StringBuilder();
+	    Random random = new Random();
+	    
+	    for (int i = 0; i < keyLength; i++) {
+	        // Pick a random character from the Vietnamese alphabet
+	        int index = random.nextInt(VIETNAMESE_ALPHABET.length());
+	        key.append(VIETNAMESE_ALPHABET.charAt(index));
+	    }
+	    
+	    // Set the generated key
+	    setKey(key.toString());
 	}
 	
+	// Loads a key from a file
 	public String loadKey(String filePath) throws FileNotFoundException, IOException {
-		StringBuilder loadedKey = new StringBuilder();
-		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				loadedKey.append(line);
-			}
-			setKey(loadedKey.toString());
-			return "SUCCESS";
-		} 
+	    StringBuilder loadedKey = new StringBuilder();
+	    
+	    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+	        String line;
+	        while ((line = reader.readLine()) != null) {
+	            // Append each line to the loaded key
+	            loadedKey.append(line);
+	        }
+	        // Set the loaded key
+	        setKey(loadedKey.toString());
+	        return "Tải khoá thành công";
+	    }
 	}
-
+	// Saves a key from a file
 	public String saveKey(String filePath) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(getKey());
-            return "SUCCESS";
+            return "Lưu khoá thành công";
         } 
 	}
 	

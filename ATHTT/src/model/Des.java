@@ -11,7 +11,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -49,7 +48,7 @@ public class Des {
         }
     }
 	
-	public void saveKey(String filePath, String algorithm, String mode, String padding, String charset, String keySize, String blockSize) throws IOException {
+	public void saveKey(String filePath, String algorithm, String mode, String padding, String charset, String keySize, String blockSize, String encodedKey) throws IOException {
 	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 	        writer.write("algorithm=" + algorithm);
 	        writer.newLine();
@@ -63,11 +62,7 @@ public class Des {
 	        writer.newLine();
 	        writer.write("blockSize=" + blockSize);
 	        writer.newLine();
-	        if(key!=null) {
-	        // Key là dạng bytes ➔ encode base64 trước
-	        String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
 	        writer.write("key=" + encodedKey);
-	        }
 	    }
 	}
 	
@@ -76,7 +71,6 @@ public class Des {
 	    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 	        props.load(reader);
 	    }
-
 	    algorithm = props.getProperty("algorithm");
 	    mode = props.getProperty("mode");
 	    padding = props.getProperty("padding");
@@ -84,116 +78,134 @@ public class Des {
 	    keySize = props.getProperty("keySize");
 	    blockSize = props.getProperty("blockSize");
 	    encodedKey = props.getProperty("key");
-	    
-//	    byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
-//	    key = new SecretKeySpec(decodedKey, algorithm);
 	}
 	
+	// Generate an IV (Initialization Vector) if the mode requires it
 	public IvParameterSpec generateIV(String mode, int blockSize) {
 		if (requiresIV(mode)) {
 			if (mode.equalsIgnoreCase("CCM")) {
+				// CCM mode uses a fixed IV size of 12 bytes
 				blockSize = 12;
 			}
 			byte[] ivBytes = new byte[blockSize];
 
+			// Fill IV with random bytes
 			new SecureRandom().nextBytes(ivBytes);
 			return new IvParameterSpec(ivBytes);
-		} else
+		} else {
+			// No IV needed for this mode
 			return null;
+		}
 	}
 	
-	private Cipher getCipher(String transformation) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException  {
+	private Cipher getCipher(String transformation)
+			throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
 		try {
 			// Thử với provider mặc định
 			return Cipher.getInstance(transformation);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {			
-				// Fallback sang Bouncy Castle nếu cần
-				return Cipher.getInstance(transformation, "BC");
-			
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			// Fallback sang Bouncy Castle
+			return Cipher.getInstance(transformation, "BC");
+
 		}
 	}
 
+	// Encrypts a string and returns the encrypted bytes
 	public byte[] encryptByte(String data, String algorithm, String mode, String padding, int blockSize, String charSet)
-			throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			UnsupportedEncodingException {
+	        throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException,
+	               InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+	               UnsupportedEncodingException {
 
-		String transformation = algorithm + "/" + mode + "/" + padding;
-		Cipher cipher = getCipher(transformation);
+	    String transformation = algorithm + "/" + mode + "/" + padding;
+	    Cipher cipher = getCipher(transformation);
 
-		IvParameterSpec iv = generateIV(mode, blockSize);
+	    IvParameterSpec iv = generateIV(mode, blockSize);
 
-		if (iv != null)
-			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		else
-			cipher.init(Cipher.ENCRYPT_MODE, key);
+	    // Initialize cipher with or without IV
+	    if (iv != null)
+	        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+	    else
+	        cipher.init(Cipher.ENCRYPT_MODE, key);
 
-		byte[] encrypted = cipher.doFinal(data.getBytes(charSet));
+	    // Encrypt the data
+	    byte[] encrypted = cipher.doFinal(data.getBytes(charSet));
 
-		// Gộp IV + ciphertext nếu cần
-		if (iv != null) {
-			byte[] ivBytes = iv.getIV();
-			byte[] output = new byte[ivBytes.length + encrypted.length];
+	    // If IV is used, combine IV and ciphertext
+	    if (iv != null) {
+	        byte[] ivBytes = iv.getIV();
+	        byte[] output = new byte[ivBytes.length + encrypted.length];
 
-			System.arraycopy(ivBytes, 0, output, 0, ivBytes.length);
-			System.arraycopy(encrypted, 0, output, ivBytes.length, encrypted.length);
+	        System.arraycopy(ivBytes, 0, output, 0, ivBytes.length);
+	        System.arraycopy(encrypted, 0, output, ivBytes.length, encrypted.length);
 
-			return output;
-		}
+	        return output;
+	    }
 
-		return encrypted;
+	    return encrypted;
 	}
 
-	public String encryptString(String data, String alogrithm, String mode, String padding, int blockSize,
-			String charSet) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			UnsupportedEncodingException {
-		byte[] bytes = encryptByte(data, alogrithm, mode, padding, blockSize, charSet);
-		String dataEncypt = Base64.getEncoder().encodeToString(bytes);
-		return dataEncypt;
+	// Encrypts a string and returns the result as a Base64-encoded string
+	public String encryptString(String data, String algorithm, String mode, String padding, int blockSize,
+	        String charSet) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
+	        NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+	        UnsupportedEncodingException {
+
+	    byte[] bytes = encryptByte(data, algorithm, mode, padding, blockSize, charSet);
+	    String dataEncrypt = Base64.getEncoder().encodeToString(bytes);
+	    return dataEncrypt;
 	}
 
+	// Decrypts byte array and returns the plaintext string
 	private String decryptByte(byte[] data, String algorithm, String mode, String padding, int blockSize,
-			String charSet) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException,
-			InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			UnsupportedEncodingException {
-		String transformation = algorithm + "/" + mode + "/" + padding;
-		Cipher cipher = getCipher(transformation); // Sử dụng phiên bản fallback
+	        String charSet) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException,
+	        InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+	        UnsupportedEncodingException {
 
-		IvParameterSpec iv = null;
-		byte[] actualEncrypted;
+	    String transformation = algorithm + "/" + mode + "/" + padding;
+	    Cipher cipher = getCipher(transformation); // Use fallback version if needed
 
-		if (requiresIV(mode)) {
-			if(mode.equalsIgnoreCase("CCM")) {
-				blockSize =12;
-			}
-			byte[] ivBytes = new byte[blockSize];
-			System.arraycopy(data, 0, ivBytes, 0, blockSize);
-			iv = new IvParameterSpec(ivBytes);
+	    IvParameterSpec iv = null;
+	    byte[] actualEncrypted;
 
-			actualEncrypted = new byte[data.length - blockSize];
-			System.arraycopy(data, blockSize, actualEncrypted, 0, actualEncrypted.length);
-		} else {
-			actualEncrypted = data;
-		}
+	    if (requiresIV(mode)) {
+	        if (mode.equalsIgnoreCase("CCM")) {
+	            blockSize = 12; // Adjust block size for CCM mode
+	        }
 
-		if (iv != null)
-			cipher.init(Cipher.DECRYPT_MODE, key, iv);
-		else
-			cipher.init(Cipher.DECRYPT_MODE, key);
+	        // Extract IV from the start of the data
+	        byte[] ivBytes = new byte[blockSize];
+	        System.arraycopy(data, 0, ivBytes, 0, blockSize);
+	        iv = new IvParameterSpec(ivBytes);
 
-		byte[] decrypted = cipher.doFinal(actualEncrypted);
-		return new String(decrypted, charSet);
+	        // Extract the actual encrypted data (excluding IV)
+	        actualEncrypted = new byte[data.length - blockSize];
+	        System.arraycopy(data, blockSize, actualEncrypted, 0, actualEncrypted.length);
+	    } else {
+	        actualEncrypted = data;
+	    }
+
+	    // Initialize cipher with or without IV
+	    if (iv != null)
+	        cipher.init(Cipher.DECRYPT_MODE, key, iv);
+	    else
+	        cipher.init(Cipher.DECRYPT_MODE, key);
+
+	    // Perform decryption
+	    byte[] decrypted = cipher.doFinal(actualEncrypted);
+	    return new String(decrypted, charSet);
 	}
 
-	public String decryptString(String data, String alogrithm, String mode, String padding, int blockSize,
-			String charSet) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
-			NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			UnsupportedEncodingException {
-		return decryptByte(Base64.getDecoder().decode(data), alogrithm, mode, padding, blockSize, charSet);
+	// Decrypts a Base64-encoded string and returns the plaintext string
+	public String decryptString(String data, String algorithm, String mode, String padding, int blockSize,
+	        String charSet) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
+	        NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
+	        UnsupportedEncodingException {
+
+	    return decryptByte(Base64.getDecoder().decode(data), algorithm, mode, padding, blockSize, charSet);
 	}
 
 	private boolean requiresIV(String mode) {
+	    // Return true if the given mode requires an initialization vector (IV)
 	    return mode.equalsIgnoreCase("CBC") ||
 	           mode.equalsIgnoreCase("CFB") ||
 	           mode.equalsIgnoreCase("OFB") ||
@@ -203,28 +215,7 @@ public class Des {
 	           mode.equalsIgnoreCase("PCBC");
 	}
 	
-	public void encryptFile(String srcFile, String destFile, String instance) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, FileNotFoundException, IOException, NoSuchProviderException, IllegalBlockSizeException, BadPaddingException {
-	       Cipher cipher = getCipher(instance);
-	       // Tạo IV ngẫu nhiên
-	       byte[] iv = new byte[16];
-	       new SecureRandom().nextBytes(iv);
-	       IvParameterSpec ivSpec = new IvParameterSpec(iv);
-	       cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-	       try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(srcFile));
-	            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
-	           // Ghi IV vào đầu file
-	           bos.write(iv);
-	           try (CipherOutputStream cos = new CipherOutputStream(bos, cipher)) {
-				byte[] buffer = new byte[1024];
-				   int bytesRead;
-				   while ((bytesRead = bis.read(buffer)) != -1) {
-				       cos.write(buffer, 0, bytesRead);
-				   }
-				   cos.flush();
-			}
-	       }
-	   }
-	
+	// Encrypt file with given cipher mode and instance
 	public void encryptFile(String srcFile, String destFile, String instance, String mode)
 	        throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 	               InvalidAlgorithmParameterException, IOException, NoSuchProviderException {
@@ -235,6 +226,7 @@ public class Des {
 	    IvParameterSpec iv = null;
 
 	    if (requiresIV(mode)) {
+	        // Generate random IV if mode needs it
 	        SecureRandom random = new SecureRandom();
 	        random.nextBytes(ivBytes);
 	        iv = new IvParameterSpec(ivBytes);
@@ -246,24 +238,23 @@ public class Des {
 	    try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(srcFile));
 	         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
 
-	        // Ghi IV vào đầu file nếu có
+	        // Write IV at the start of the file if used
 	        if (requiresIV(mode)) {
 	            bos.write(ivBytes);
 	        }
 
 	        try (CipherOutputStream cos = new CipherOutputStream(bos, cipher)) {
-				byte[] buffer = new byte[1024];
-				int bytesRead;
-				while ((bytesRead = bis.read(buffer)) != -1) {
-				    cos.write(buffer, 0, bytesRead);
-				}
-				
-				cos.flush();
-			}
+	            byte[] buffer = new byte[1024];
+	            int bytesRead;
+	            while ((bytesRead = bis.read(buffer)) != -1) {
+	                cos.write(buffer, 0, bytesRead);
+	            }
+	            cos.flush();
+	        }
 	    }
 	}
 
-	   // Giải mã file
+	// Decrypt file with given cipher mode and instance
 	public void decryptFile(String srcFile, String destFile, String instance, String mode)
 	        throws NoSuchAlgorithmException, NoSuchPaddingException, IOException,
 	               InvalidKeyException, InvalidAlgorithmParameterException, NoSuchProviderException {
@@ -277,9 +268,9 @@ public class Des {
 	         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destFile))) {
 
 	        if (requiresIV(mode)) {
-	            // Đọc IV từ đầu file
+	            // Read IV from start of the file
 	            if (bis.read(ivBytes) != blockSize) {
-	                throw new IOException("Không thể đọc đủ IV từ file");
+	                throw new IOException("Could not read full IV from file");
 	            }
 	            iv = new IvParameterSpec(ivBytes);
 	            cipher.init(Cipher.DECRYPT_MODE, key, iv);
@@ -287,7 +278,7 @@ public class Des {
 	            cipher.init(Cipher.DECRYPT_MODE, key);
 	        }
 
-	        // Bọc CipherInputStream sau khi đã đọc IV
+	        // Use CipherInputStream after reading IV
 	        try (CipherInputStream cis = new CipherInputStream(bis, cipher)) {
 	            byte[] buffer = new byte[1024];
 	            int bytesRead;
@@ -295,7 +286,6 @@ public class Des {
 	                bos.write(buffer, 0, bytesRead);
 	            }
 	        }
-
 	        bos.flush();
 	    }
 	}

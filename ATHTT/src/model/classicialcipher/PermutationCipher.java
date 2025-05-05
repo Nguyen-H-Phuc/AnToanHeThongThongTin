@@ -12,31 +12,37 @@ import java.util.Set;
 public class PermutationCipher extends ClasscialCipher {
 	private int [] permutationTable;
 	
-	
-	
+	// Generates a random permutation key of given length
 	public int[] genKey(int keyLength) {
-		int []permutationTable = new int[keyLength];
-		Random random = new Random();
-		int i = 0;
-		while (i < keyLength) {
-			int number = random.nextInt(keyLength);
-			for (int j = 0; j <= i; j++) {
-				if (j == i) {
-					permutationTable[i] = number;
-					i++;
-				}
-				if (permutationTable[j] == number) {
-					break;
-				}
-			}
-		}
-		return permutationTable;
+	    int[] permutationTable = new int[keyLength];
+	    Random random = new Random();
+	    int i = 0;
+
+	    // Fill the permutation table with unique random numbers
+	    while (i < keyLength) {
+	        int number = random.nextInt(keyLength);
+
+	        for (int j = 0; j <= i; j++) {
+	            if (j == i) {
+	                permutationTable[i] = number;
+	                i++;
+	            }
+	            if (permutationTable[j] == number) {
+	                break; // Skip if the number is already used
+	            }
+	        }
+	    }
+
+	    return permutationTable;
 	}
 	
+	// Loads a key from a file
 	public String loadKey(String filePath) throws FileNotFoundException, IOException, NumberFormatException {
 	    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 	        String line = reader.readLine();
+	        
 	        if (line != null) {
+	            // Split the line by commas and parse into integers
 	            String[] parts = line.split(",");
 	            permutationTable = new int[parts.length];
 	            for (int i = 0; i < parts.length; i++) {
@@ -46,9 +52,9 @@ public class PermutationCipher extends ClasscialCipher {
 	        } else {
 	            return "File rỗng.";
 	        }
-	    } 
+	    }
 	}
-
+	 // Save key from a file
 	public String saveKey(String filePath) throws IOException {
 		try (FileWriter writer = new FileWriter(filePath);) {
 			for (int i = 0; i < permutationTable.length; i++) {
@@ -59,33 +65,33 @@ public class PermutationCipher extends ClasscialCipher {
 		}
 	}
 		
+	// Encrypts the input text 
 	public void encryptText(int[] permutationTable) {
 	    StringBuilder result = new StringBuilder();
 	    int col = permutationTable.length;
 	    String input = getInput();
 	    int inputLength = input.length();
 
-	    // Tính số hàng cần thiết (có thể dư, điền thêm ký tự '-')
+	    // Calculate the number of rows (fill with '-' if needed)
 	    int row = (int) Math.ceil((double) inputLength / col);
 
-	    // Duyệt từng hàng
+	    // Loop through each row
 	    for (int i = 0; i < row; i++) {
-	        // Duyệt từng cột dựa trên permutationTable
+	        // Loop through each column based on the permutation table
 	        for (int j = 0; j < col; j++) {
-	            // Xác định chỉ số thực trong input: hàng * số cột + cột thực tế
+	            // Determine the actual index in the input
 	            int indexInInput = i * col + permutationTable[j];
 
 	            if (indexInInput >= inputLength) {
-	                // Nếu vượt ngoài input → điền ký tự '-'
+	                // If out of bounds fill with '-'
 	                result.append('-');
 	            } else {
-	                // Nếu trong phạm vi → lấy ký tự tương ứng
+	                // If within bounds take the corresponding character
 	                result.append(input.charAt(indexInInput));
 	            }
 	        }
 	    }
 
-	    // Gán kết quả mã hóa ra output
 	    setOutput(result.toString());
 	}
 
@@ -103,7 +109,7 @@ public class PermutationCipher extends ClasscialCipher {
 
 	    // Loop over each row
 	    for (int i = 0; i < row; i++) {
-	        // Loop over each column (using the reversed permutation order)
+	        // Loop over each column
 	        for (int j = 0; j < col; j++) {
 	            // Calculate the index in the input string
 	            int indexInInput = i * col + reverseArray[j];
@@ -112,7 +118,7 @@ public class PermutationCipher extends ClasscialCipher {
 	            if (indexInInput < inputLength) {
 	                char c = input.charAt(indexInInput);
 
-	                // Ignore padding characters (e.g., '-')
+	                // Ignore padding characters '-'
 	                if (c != '-') {
 	                    result.append(c);
 	                }
@@ -120,22 +126,25 @@ public class PermutationCipher extends ClasscialCipher {
 	        }
 	    }
 
-	    // Set the decrypted output
 	    setOutput(result.toString());
 	}
 
 	
-	public int[] reverseArrayPermutation (int [] permutationTable) {
-		int [] reverseArray = new int[permutationTable.length];
-		for (int i = 0; i< permutationTable.length; i++) {
-			for(int j = 0; i< permutationTable.length; j++) {
-				if(i == permutationTable[j]) {
-			
-			reverseArray[i] = j;
-			break;
-		}
-			}}
-		return reverseArray;
+	// Reverses the given permutation table
+	public int[] reverseArrayPermutation(int[] permutationTable) {
+	    int[] reverseArray = new int[permutationTable.length];
+	    
+	    for (int i = 0; i < permutationTable.length; i++) {
+	        for (int j = 0; j < permutationTable.length; j++) {
+	            if (i == permutationTable[j]) {
+	                // Store the reversed position
+	                reverseArray[i] = j;
+	                break;
+	            }
+	        }
+	    }
+	    
+	    return reverseArray;
 	}
 	
 	public int[] getPermutationTable() {
@@ -150,19 +159,21 @@ public class PermutationCipher extends ClasscialCipher {
 	    Set<Integer> seen = new HashSet<>();
 	    for (int num : array) {
 	        if (!seen.add(num)) {
-	            return true; // Có trùng
+	            return true; // duplicate
 	        }
 	    }
-	    return false; // Không trùng
+	    return false; // not duplicate
 	}
 
+	// Checks if the array has any value greater than the array length
 	public boolean hasValueGreaterThanIndex(int[] array) {
 	    for (int i = 0; i < array.length; i++) {
 	        if (array[i] > array.length) {
-	            return true; // Có phần tử lớn hơn index
+	            return true; // Found a value greater than length
 	        }
 	    }
-	    return false; // Không có
+	    return false; // No such value found
 	}
+
 
 }
